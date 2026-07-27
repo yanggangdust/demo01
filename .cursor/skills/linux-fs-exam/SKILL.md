@@ -360,6 +360,18 @@ FS(EXT3/XFS/…)  FS  未分配
 
 易考点：查看命令对：`pvs/pvdisplay`、`vgs/vgdisplay`、`lvs/lvdisplay`；另可用 `fdisk -l` 看分区。
 
+#### 创建类
+
+| 命令 | 作用 |
+|------|------|
+| `pvcreate 设备路径` | 创建物理卷（PV） |
+| `vgcreate 名字 pv路径` | 创建卷组（VG） |
+| `lvcreate -n 名字 -L 大小 vg名` | 创建逻辑卷（LV）；`-n`=名字，`-L`=大小 |
+| `mkfs.ext4 lv完整路径` | 格式化逻辑卷（也可用 `mkfs.文件系统格式` 或 `-t 文件系统格式`） |
+| `mount lv完整路径 挂载点` | 挂载使用（可用 `/etc/fstab` 设置开机挂载） |
+
+易考点：创建流程 `pvcreate → vgcreate → lvcreate → mkfs → mount`；开机挂载写 `/etc/fstab`。
+
 ## 复习互动方式
 
 1. **默写**：某一整块（如 LVM 三层 / 挂载流程 / 软硬链接对比）
