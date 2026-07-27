@@ -654,7 +654,15 @@ for each item:
 - 三大协议 rgw/rbd/cephfs 都经 librados+osdc。
 
 ## 四、Ceph 存储协议
-> 待补充：预计涵盖 CephFS / RBD / RadosGW 三大接口及协议类型。
+
+### 4.1 对象存储协议 RGW
+> 待补充：RGW（RADOS Gateway）提供 S3/Swift 兼容的对象存储接口；架构、bucket、数据路径等。
+
+### 4.2 文件存储协议 CephFS
+> 待补充：CephFS 是 POSIX 兼容文件系统；MDS 元数据、客户端挂载、数据路径等。
+
+### 4.3 块存储协议 RBD
+> 待补充：RBD（RADOS Block Device）提供块存储给虚拟机/裸机；image、条带、数据路径等。
 
 ## 五、Ceph 开源社区
 > 待补充：预计涵盖社区检索学习资料、版本/文档获取等。
