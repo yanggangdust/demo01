@@ -557,6 +557,42 @@ for each item:
 
 易考点：多副本为高可用→核心是一致性；Host3 无响应的两种原因（未到+宕机 / 到了+断电含写一半）；恢复后三问=达成一致/解决分歧/解决写一半（引出 Peering 与 PGLog）。
 
+#### 3.3.2 强一致算法 PG Peering（PG 状态机）
+
+**概念背景**：
+- RADOS **不假设**不同 Map（OSD Map）间数据分布是连续的；仅当 Map 变更影响到当前 PG 时才建立一致性视图。
+- **Peering 算法**：构建 PG 内容的一致视图，恢复正确的数据分布与副本。依赖 OSD 主动复制三样：
+  - **PGLog**：操作记录。
+  - **PG Content Info**：PG 应含哪些对象及版本的状态。
+  - **PastIntervals**：该 PG 历史上 OSD 集合的变迁。
+- **状态机复制**：保证多副本一致用有限状态机行为——若每个副本收到**完全相同的有序输入序列(log)**，回放后内部数据必然相同。
+
+**保证一致的两件事**：
+1. **严格有序 + 唯一「指挥官」**：所有消息严格有序；PG 对每次更新在 log 中分配**单调递增的 version**。为此同一时刻**只有一个「指挥官」能发指令**。
+   - **Primary 选举**：`up` 或 `acting` 集合中**第一个健康在线的 OSD** 选为 **primary**，其余为副本。
+2. **权威日志选择**：Peering 算法保证无论冗余级别内发生何种异常，都能选出**权威日志(authoritative log)** 并解决「日志分叉」，使所有副本日志严格一致。
+
+**PastIntervals（epoch 区间示例）**：
+| 区间 | up | acting | Primary |
+|------|-----|--------|---------|
+| Epoch 1–100 | [1,2,3] | [1,2,3] | OSD.1 |
+| Epoch 101–200 | [1,2,4] | [1,2] | OSD.1 |
+| Epoch 201–300 | [1,3,4] | [1] | OSD.1 |
+
+- OSD.1 始终为主；其他 OSD(2/3/4) 在集合中进出变化。
+
+**PG 状态机流程**（起点 `Initial → Reset → Started`，按 `is_primary` 分流）：
+- **Primary**：→ `Primary` → `Peering`（执行 `GetInfo`/`GetLog`/`GetMissing`/`WaitUpThru`）；与副本交换消息（发 `MOSDPGQuery: INFO/LOG`，收 `MNotifyRec`/`MLogRec`）→ Peering 完成进入 `Active`/`Activating`；后续恢复态 `Recovering`/`WaitLocalRecoveryReserved` 等。
+- **Replica**：→ `Stray`；响应主 `MNotifyRec`/`MLogRec`/`MInfoRec`；被主 `Activate` 后进入 `ReplicaActive`。
+
+**小结**：Peering 从 `PastIntervals` 选 OSD；`acting`（实际参与）可能 ≠ `up`（CRUSH 认为应在的）；primary 会向 MON 上报这些差异。
+
+易考点：
+- Peering 依赖 PGLog / PG Info / PastIntervals；状态机复制=相同有序 log→相同数据。
+- 一致两件事：严格有序+唯一指挥官（primary=up/acting 第一个健康 OSD）；权威日志解决分叉。
+- up vs acting 可不同；primary 向 MON 上报差异。
+- Primary 走 Peering(GetInfo/GetLog/...)→Active；Replica 走 Stray→ReplicaActive。
+
 ### 3.4 LibRADOS
 > 待补充：LibRADOS 库、客户端与 RADOS 交互。
 
