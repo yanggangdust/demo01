@@ -254,12 +254,7 @@ Ceph 发展时间线：
 
 易考点：CAP 三选二；P 在分布式下必选 → 实际是 CP/AP 取舍；CP 牺牲可用、AP 牺牲一致（最终一致）；AC 需完美网络→单区域→非分布式。
 
-## 三、Ceph RADOS 子系统
-
-### 3.1 （待补充）
-> 待补充：RADOS 概述、组件协作、读写流程等。
-
-### 3.2 OSDMap
+### 2.4 OSDMap
 
 **查看命令**：
 - `ceph osd dump`：查看 OSDMap 当前状态（epoch、fsid、时间戳、flags、各 pool 配置、OSD 状态）。
@@ -292,7 +287,7 @@ Ceph 发展时间线：
 - 大集群用**增量 map** 优化传输。
 - 对外服务经 **POOL**；OSDMap 五大结构（Cluster/CRUSH/POOL/PG/OSD）。
 
-### 3.3 Paxos 共识算法
+### 2.5 Paxos 共识算法
 
 **定义**：Paxos 解决多节点如何对一个提案达成共识；提案号需**全局单调递增**。
 
@@ -325,7 +320,7 @@ Ceph 发展时间线：
 - Multi Paxos = Basic + Leader 选举；选主后省 Prepare，效率提升。
 - 特点：强一致、无脑裂，但交互多、效率低。
 
-### 3.4 哈希散列算法（Object → PG，CRUSH 第一阶段）
+### 2.6 哈希散列算法（Object → PG，CRUSH 第一阶段）
 
 **映射总流程**：`Object → [第一阶段] → PG → [第二阶段] → OSDs`。本节讲第一阶段（Object → PG）。
 
@@ -356,7 +351,7 @@ else
 - stable_mod 公式（掩码 + 回退逻辑）；保证低位同→同 PG，为 PG 分裂打基础。
 - 非 2 幂 pg_num 的回退映射；PG 分裂 $2^4\to2^6$ 一分三。
 
-#### 3.4.1 PG 分裂二进制详解与重要提示
+#### 2.6.1 PG 分裂二进制详解与重要提示
 
 **重要提示**：创建存储池时 **pg_num 必须指定为 2 的幂**，否则各 PG 中对象数**不均衡**！
 
@@ -377,7 +372,7 @@ else
 
 易考点：建池 pg_num 须为 2 的幂（否则不均衡）；PG 分裂靠多看高位（00/01/10/11）实现一分多、不全量迁移。
 
-### 3.5 一致性哈希算法 CRUSH（PG → OSD，第二阶段）
+### 2.7 一致性哈希算法 CRUSH（PG → OSD，第二阶段）
 
 **映射总流程**：`Object →(第一阶段)→ PG →(第二阶段)→ OSDs`。本节讲第二阶段（PG → OSDs）。
 
@@ -428,6 +423,25 @@ for each item:
 - 算法对比：unique 最快但抗变差；straw 抗变最强、迁移最少（增删元素均最好）。
 - 相同 pgid+map → 相同 OSD 列表（确定性）。
 - straw 选最长；层级 take/select 逐层按故障域选副本。
+
+## 三、Ceph RADOS 子系统
+
+> 第三章聚焦 RADOS 各子系统组件及其协作。
+
+### 3.1 MON 子系统
+> 待补充：Monitor 组件构成、作用、用 Paxos 维护 OSDMap 等。
+
+### 3.2 MGR 子系统
+> 待补充：Manager 组件构成、作用、集群监控/管理。
+
+### 3.3 OSD 子系统
+> 待补充：OSD 组件构成、作用、数据读写、BlueStore/FileStore 等。
+
+### 3.4 LibRADOS
+> 待补充：LibRADOS 库、客户端与 RADOS 交互。
+
+### 3.5 子系统间的协作关系
+> 待补充：MON/MGR/OSD/LibRADOS 之间如何协作。
 
 ## 四、Ceph 存储协议
 > 待补充：预计涵盖 CephFS / RBD / RadosGW 三大接口及协议类型。
