@@ -312,8 +312,33 @@ VFS → I/O Cache → Read Ahead → Distribute/Stripe → Replicate → Client
 
 ## 四、文件系统应用场景（Part 4：分布式文件场景案例分析）
 
-### 4.1 案例1
-> 待补充：用户发该案例截图后填入（场景、架构、选型、要点）。
+### 4.1 案例1：自动驾驶模型训练（AI 训练存储）
+
+**客户场景与需求**：
+- 典型**自动驾驶模型训练**场景。
+- 需求：**数据量级大、高吞吐、低延时**。
+
+**解决方案**：
+1. 虚拟机挂载 **PFS（并行文件系统）**，共享访问存储数据。
+2. **透明加载**对象存储中的数据集到 PFS，作为计算运行时存储，简化数据流转。
+3. 配合**调度策略**实现**数据预热**，进一步减少计算 IO 等待时间，加速数据处理。
+
+**架构三层**：
+
+| 层 | 内容 |
+|----|------|
+| **计算资源** | Intel、AMD、NVIDIA、Kubernetes |
+| **文件存储 PFS** | 目录：`/backup`；`/departments`→`/finance`、`/bigdata`；`/ai_training`→`/resnet50`、`/nlp` |
+| **对象存储（冷数据 Bucket）** | Bucket1：`/ImageNet1k/`、`/ImageNet2w/`；Bucket2：`/NLPDataset/` |
+
+**数据关系**：
+- **蓝色双向**：`/backup`、`/bigdata` ↔ 冷数据 Bucket（同步/传输）。
+- **红色 Link**：`/resnet50` → Bucket1；`/nlp` → Bucket2（透明加载，PFS 目录链接到对象存储数据集）。
+
+易考点：
+- 场景 = AI/自动驾驶训练，要**大容量+高吞吐+低延时**。
+- PFS 做运行时高性能存储，对象存储做冷数据；**透明加载 + 数据预热**减少 IO 等待。
+- PFS 目录 Link 到对象存储 Bucket（如 resnet50→ImageNet、nlp→NLPDataset）。
 
 ### 4.2 案例2
 > 待补充：用户发该案例截图后填入（场景、架构、选型、要点）。
