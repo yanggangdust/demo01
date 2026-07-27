@@ -42,7 +42,33 @@ Ceph 发展时间线：
 - 治理：**Ceph Foundation**（隶属 Linux Foundation，2018 成立）。
 
 ### 1.2 去中心化的分布式架构
-> 待补充：去中心化设计、无单点故障、数据分布与寻址方式等。
+
+**分层架构（自上而下）**：
+
+| 层 | 组件 | 说明 |
+|----|------|------|
+| **CLIENT** | Block / Object / File | 块存储、对象存储、文件系统三种访问 |
+| **接口层** | **LIBRADOS**（含 **RBD**→块、**RADOS GW**→对象）；**CEPH FS**（→文件） | 应用接入接口 |
+| **核心层** | **RADOS** | 抽象的对象存储集群，所有存储类型的基础 |
+| **服务/管理层** | **MON**、**MDS**、**OSD** | MON 维护集群状态；MDS 元数据服务(主要给 CephFS)；OSD 主要数据承载 |
+| **存储后端/内核层** | **FileStore**→XFS(内核)→HDD；**BlueStore**→Block Cache(内核)→SSD | 旧 FileStore 用 XFS；新 BlueStore 针 SSD 优化 |
+| **物理层** | HDD / SSD | 实际磁盘 |
+
+**关键定义**：
+- Ceph 是**开源的分布式存储系统**，**支持对象存储、块存储和文件系统**。
+- **RBD**：块存储接口
+- **RGW（RADOS GW）**：对象存储网关
+- **CEPH FS**：文件级存储接口
+- **RADOS**：抽象的对象存储集群
+- **MON**：集群状态维护
+- **MDS**：元数据服务
+- **OSD**：对象存储设备，主要的数据承载
+
+易考点：
+- 三层主线：Client → RADOS 接口(RBD/RGW/CephFS) → 物理 OSD。
+- 组件职责：MON=状态、MDS=元数据(CephFS)、OSD=数据。
+- 两种后端：FileStore(XFS/HDD) vs BlueStore(SSD 优化)。
+- 去中心化：无单点元数据瓶颈，靠 RADOS + CRUSH。
 
 ### 1.3 核心问题（分布式存储五大核心问题）
 
