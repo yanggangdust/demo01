@@ -325,6 +325,37 @@ Ceph 发展时间线：
 - Multi Paxos = Basic + Leader 选举；选主后省 Prepare，效率提升。
 - 特点：强一致、无脑裂，但交互多、效率低。
 
+### 3.4 哈希散列算法（Object → PG，CRUSH 第一阶段）
+
+**映射总流程**：`Object → [第一阶段] → PG → [第二阶段] → OSDs`。本节讲第一阶段（Object → PG）。
+
+**哈希函数**：把输入映射为定长输出。好哈希 = ① 计算快 ② 冲突率低。
+
+**ceph_stable_mod 流程**：
+1. 对对象名用 `ceph_str_hash_rjenkins` 哈希 → **32 位整数**。
+2. 再用 `ceph_stable_mod` 做**位掩码**运算：
+```c
+if ((hash & (2^n - 1)) < pg_num)
+    return (hash & (2^n - 1));
+else
+    return (hash & (2^{n-1} - 1));
+```
+3. 输出：对象归入某 Pool 的某个 PG（如 Test-Pool 的 PG 1.1/1.2/1.3/1.4）。
+
+**stable_mod 的作用与优势**：
+- 用 32 位哈希与 pg_num 做位掩码。
+- 保证**低位相同**的对象落入**同一 PG** → 为 **PG 分裂（扩 PG 数）**打基础。
+
+**非 2 的幂的 PG 数处理（示例 pg_num=12, n=4, 2^4=16）**：
+- PG 0~11 存在；若掩码结果落在 12~15（不存在的 PG），用第二逻辑 `hash & (2^{n-1}-1)` 重映射回 `[0, 2^{n-1}-1]`（即 0~7）。
+
+**PG 分裂**：pg_num 增长（如 $2^4 \to 2^6$）时，因低位一致，1 个旧 PG 可分裂成 3 个新 PG。
+
+易考点：
+- 第一阶段 Object→PG 用 `ceph_str_hash_rjenkins` + `ceph_stable_mod`。
+- stable_mod 公式（掩码 + 回退逻辑）；保证低位同→同 PG，为 PG 分裂打基础。
+- 非 2 幂 pg_num 的回退映射；PG 分裂 $2^4\to2^6$ 一分三。
+
 ## 四、Ceph 存储协议
 > 待补充：预计涵盖 CephFS / RBD / RadosGW 三大接口及协议类型。
 
