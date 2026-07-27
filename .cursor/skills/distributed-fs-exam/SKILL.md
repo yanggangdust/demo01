@@ -242,6 +242,22 @@ File → Chunk(≤64MB) → Slice(由写产生) → Block(4MB)
 
 易考点：JuiceFS 数据四级 File→Chunk(64M)→Slice→Block(4M)；Chunk/Slice 逻辑、Block 物理；上传前可加密压缩。
 
+#### 3.1.2 JuiceFS 元数据/数据分离映射
+
+**元数据引擎（左）**：存文件系统**逻辑组织**——目录树结构（目录、文件名、权限、时间戳、指向数据块的指针）。
+- 树形示例：`/` → folder1、file1、file3、folder2；folder1 → file4、file5、folder3；folder3 → file8；folder2 → file7、file6。
+
+**对象存储（右）**：存文件**实际内容**，按 chunk 命名存放，如：
+- `/chunks/0/0/310_5_3431768`
+- `/chunks/0/0/621_3_4234797`
+- `/chunks/123/4/888_2_xxxxxxx`
+
+**映射关系**：一个文件由多个 chunk 组成。
+- file7 → 两个 chunk 路径
+- file8 → 一个 chunk 路径
+
+易考点：JuiceFS = **元数据(目录树，存 DB) + 数据(chunk，存对象存储)** 分离；元数据引擎负责快速文件系统操作，对象存储负责低成本可扩展持久化。
+
 ### 3.2 Ceph 架构简介
 > 待补充：Ceph 架构、RADOS/MON/OSD/MDS、CRUSH 算法、池与 PG、应用场景。
 
