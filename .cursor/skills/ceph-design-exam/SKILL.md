@@ -377,6 +377,58 @@ else
 
 易考点：建池 pg_num 须为 2 的幂（否则不均衡）；PG 分裂靠多看高位（00/01/10/11）实现一分多、不全量迁移。
 
+### 3.5 一致性哈希算法 CRUSH（PG → OSD，第二阶段）
+
+**映射总流程**：`Object →(第一阶段)→ PG →(第二阶段)→ OSDs`。本节讲第二阶段（PG → OSDs）。
+
+**CRUSH 核心原则**：
+- **按权重分布**：按各盘 **weight** 分布 PG，追求近似均匀的概率分布。
+- **Cluster Map**：层级化集群地图，表示可用存储资源。
+- **Placement Rules（放置规则）**：定义数据分布策略，指定：使用的集群拓扑、**故障域**（rack/host）、副本数、副本放置约束。
+
+**算法对比（CRUSH 内部）**：
+- **Straw**：把所有元素比作「稻草」，对给定输入为每个元素随机算一个长度，选最长者。
+- **Unique**：执行效率最高，但抗结构变化能力最差。
+- **Straw**：效率较低，但抗结构变化能力最强，保证集群扩缩容时**数据迁移最少**。
+
+| 指标 | unique | list | tree | straw |
+|------|--------|------|------|-------|
+| 时间复杂度 | O(1) | O(N) | O(log N) | O(N) |
+| 增加元素 | 差 | 最好 | 好 | 最好 |
+| 删除元素 | 差 | 差 | 好 | 最好 |
+
+- **注**：相同 pgid 和 map 下，一致性哈希**总输出相同 OSD 列表**。
+
+**执行流程**：
+1. 输入：PG 1.1
+2. 哈希：`crush_hash32_rjenkins1_2(pgid, poolid)` → `pps`（32 位整数）
+3. CRUSH（straw2）：`CRUSH(ruleid, pps, pool_size, osd_reweight)`
+4. 选择：`take(root)` → 选 root → `emit` → 输出 `[1, 5, 9]`（OSD ID）
+
+**Straw 伪代码**：
+```python
+max_x = -1; max_item = -1
+for each item:
+    x = hash(input, r)
+    x = ln(x / 65536) / weight
+    if x > max_x:
+        max_x = x; max_item = item
+```
+
+**层级选择示例**（拓扑：root→rack1/2/3→各 2 host→各 2 OSD）：
+1. `take(root)` → root
+2. `select(3, rack)` → rack1、rack2、rack3
+3. `select(1, host)` → host1、host3、host5
+4. `select(1, osd)` → osd.1、osd.5、osd.9
+
+→ 副本跨不同故障域（机架/主机）分布，保证高可用。
+
+易考点：
+- CRUSH 按权重分布；放置规则指定故障域/副本数。
+- 算法对比：unique 最快但抗变差；straw 抗变最强、迁移最少（增删元素均最好）。
+- 相同 pgid+map → 相同 OSD 列表（确定性）。
+- straw 选最长；层级 take/select 逐层按故障域选副本。
+
 ## 四、Ceph 存储协议
 > 待补充：预计涵盖 CephFS / RBD / RadosGW 三大接口及协议类型。
 
