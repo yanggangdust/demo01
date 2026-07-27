@@ -494,8 +494,46 @@ for each item:
 - HA = Active-Standby；Mon 用 MgrMap 指定主；通常与 Mon 同节点。
 - 内置模块：Dashboard/Prometheus/Balancer/Zabbix 等。
 
-### 3.3 OSD 子系统
-> 待补充：OSD 组件构成、作用、数据读写、BlueStore/FileStore 等。
+### 3.3 OSD 子系统（智能存储）
+
+**核心角色**：OSD 是「磁盘守护者」。用 **OSDMap**、**CRUSH 算法**、**PG 状态机**自主完成数据分布；保证副本间强一致、自校验纠错、磁盘故障自恢复、自管理——这种自治是大规模智能存储的基础。
+
+**信息上报**：OSD 周期性采集磁盘容量与 PG 状态，上报给 **Mgr**，由 Mgr 汇聚集群数据。
+
+**网络双平面**：OSD 流量分两个平面——**Public 服务网络平面** 与 **Cluster 网络平面**。
+
+**心跳机制**：
+- **OSD-OSD 心跳**：对等 OSD 在两个网络平面维持心跳；网络路径阻塞则上报 MON；若**多个不同故障域的 OSD** 都报告某 OSD 异常，MON 在 OSDMap 中标记其为 **Down**。
+- **OSD-MON 心跳**：OSD 与 MON 在 Public 平面维持心跳；连接丢失，MON 直接在 OSDMap 标记该 OSD 为 **Down**。
+
+**承载内容**：OSD 承载 CRUSH 分配的 **PG** 及 PG 内存储的 **Rados Object**。
+
+**PG 元数据**：
+- **PGInfo**：记录 PG 集合历史（**PastIntervals**）、**Peering** epoch 逻辑时间点、**Recovery** 进度指针。
+- **PGLog**：用单调递增逻辑时钟 **eversion（epoch + version）**。
+
+**数据事务**：PG 把用户数据封装为 **Transaction**，通过多副本或纠删码等冗余策略，经网络发到多个 **ObjectStore** 节点并落盘。
+
+**Peering 日志**：每次用户数据修改记为 `eversion PGLog`（记录哪个操作改了哪个对象）并更新 PGInfo；该元数据与用户数据打包进事务落盘，为 **Peering** 过程做准备。
+
+**强一致性**：PG 状态机保证副本一致，尤其在 OSD 恢复或集群扩容时通过 **Peering** 算法保证。
+
+**OSD 内部分层架构**：
+
+| 层 | 组件 |
+|----|------|
+| **Msgr（通信层）** | Public Msgr、Cluster Msgr、Cluster/Public heartbeat Msgr、MgrClient、MonClient |
+| **OSD（管理/控制层）** | handle/share OSDMap、Capacity/PG Stat、cls API、NetworkHeartbeat、ThreadHeartbeat、OSD Superblock、OSD Shard Queue、Scrub/Recovery Reservation |
+| **PrimaryLogPG（PG 层）** | PG、PastIntervals、PGLog、Peering、PG History、PGTransaction、PG Info、PG Scrub |
+| **PGBackend（一致性/后端层）** | ECBackend、ReplicatedBackend、ObjectTransaction |
+| **ObjectStore（存储引擎层）** | FileStore、BlueStore、KStore、MemStore、RocksDB |
+
+易考点：
+- OSD=磁盘守护者；靠 OSDMap+CRUSH+PG 状态机自治（分布/强一致/自恢复）。
+- 双网络平面（Public/Cluster）；两类心跳（OSD-OSD 多故障域举报→Down；OSD-MON 丢连→Down）。
+- PG 元数据 PGInfo(PastIntervals/Peering epoch/Recovery 指针) + PGLog(eversion=epoch+version)。
+- 事务封装 + 多副本/EC 落盘；PGLog 为 Peering 准备；Peering 保证恢复/扩容时一致。
+- OSD 内部五层：Msgr/OSD/PrimaryLogPG/PGBackend/ObjectStore(BlueStore 等)。
 
 ### 3.4 LibRADOS
 > 待补充：LibRADOS 库、客户端与 RADOS 交互。
