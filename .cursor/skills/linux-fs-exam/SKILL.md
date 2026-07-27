@@ -91,7 +91,19 @@ description: >-
 记忆：IDE 按 a/b/c/d 对应 IDE1 master/slave、IDE2 master/slave；SCSI/SATA 按 a/b…；逻辑分区从 **5** 起（如 hdd5、sdb6）。
 
 ### 1.3 分区工具
-> 待补充：fdisk、parted、gdisk 等分区工具用法与对比。
+
+#### 分区工具 fdisk
+
+- **定义**：Linux 原生工具，用于观察磁盘使用情况、对硬盘分区。
+- **语法**：`# fdisk [ -l ] [设备名]`
+
+| 命令 | 作用 |
+|------|------|
+| `fdisk -l` | 查看系统**所有分区**情况 |
+| `fdisk -l /dev/sda` | 查看设备 `/dev/sda` 的分区情况 |
+| `fdisk /dev/sda` | **交互式**对 `/dev/sda` 进行分区管理 |
+
+易考点：`fdisk -l` 看全部；指定设备看该盘；不加 `-l` 进入交互式分区。
 
 ## 二、Linux 常用文件系统
 > 待补充：ext4/XFS/Btrfs 等文件系统、格式化、挂载/卸载、fstab、inode、软硬链接等。
