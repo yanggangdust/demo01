@@ -462,7 +462,37 @@ for each item:
 > 待补充：Monitor 组件构成、作用、用 Paxos 维护 OSDMap 等。
 
 ### 3.2 MGR 子系统
-> 待补充：Manager 组件构成、作用、集群监控/管理。
+
+**背景与动机**：MGR 引入前，OSD 容量、PG 状态等统计信息由 Monitor(Mon) 处理，给 Mon 带来沉重负担——而 Mon 的稳定与效率对整个集群可用性至关重要。MGR 的目标是**把非关键、统计密集的功能从 Mon 卸载**，提升性能与可扩展性。
+
+**四大核心功能**：
+1. **减轻 Mon 负担**：分担并扩展部分 Monitor 功能。
+2. **监控 OSD 容量与 PG 状态**：采集 OSD 容量与 PG 状态统计；计算单个 pool 及整体集群容量；周期性上报给 Mon 以维护更新 **PGMap**。
+3. **异常告警（异常检测）**：基于采集的集群信息与监控指标，异常时生成告警。
+4. **Python 框架执行模块**：允许用户按需创建自定义监控模块；对外提供 Ceph 监控数据与性能指标（如 `iostat`）；处理集群数据**再均衡(balancer)**与管理告警信息。
+
+**模块概览（ceph-mgr）**：
+- **MgrStandby**：高可用模块。
+- **PyModules**：StandbyPyModules / ActivePyModules。
+- **内置模块**：Dashboard、Alerts、DiskPrediction、RESTful、Prometheus、Iostat、Crash、Ansible、Zabbix、Balancer。
+- **系统组件**：**DaemonServer**（CLI 与上报）、**ClusterState**（维护集群状态）。
+
+**高可用（HA）机制**：
+- **主备模式（Active-Standby）**：多节点可同时运行多个 Mgr 进程，但**只有一个主 Mgr 处于 Active** 提供服务。
+- **Standby**：备 Mgr 维持心跳，随时准备在主故障时接管。
+- **Mon 的作用**：维护带版本号的 **MgrMap(epoch)**，负责指定哪个 Mgr 为主。
+- **部署**：通常 MGR 实例与 Monitor 实例部署在同一节点。
+
+**插件与通知框架**：
+- MGR 的 Python 插件框架实现 **Notify 机制**。
+- 用户可按需实现自定义功能插件进行集群管理。
+- Notify 机制可对接外部监控系统与框架。
+
+易考点：
+- MGR 由来 = 卸载 Mon 的统计负担（OSD 容量/PG 状态 → PGMap）。
+- 四大功能：减负、监控容量/PG、告警、Python 框架（balancer/iostat 等）。
+- HA = Active-Standby；Mon 用 MgrMap 指定主；通常与 Mon 同节点。
+- 内置模块：Dashboard/Prometheus/Balancer/Zabbix 等。
 
 ### 3.3 OSD 子系统
 > 待补充：OSD 组件构成、作用、数据读写、BlueStore/FileStore 等。
