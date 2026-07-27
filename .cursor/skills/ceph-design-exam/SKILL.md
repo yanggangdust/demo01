@@ -655,8 +655,46 @@ for each item:
 
 ## 四、Ceph 存储协议
 
-### 4.1 对象存储协议 RGW
-> 待补充：RGW（RADOS Gateway）提供 S3/Swift 兼容的对象存储接口；架构、bucket、数据路径等。
+### 4.1 对象存储协议 RGW（S3/Swift）
+
+**架构栈（自上而下）**：
+| 层 | 组件 |
+|----|------|
+| API | S3 兼容 API / Swift 兼容 API |
+| 网关 | **radosgw** |
+| 库 | **librados** |
+| Ceph | OSDs / Monitors |
+
+**对象云存储工作流**：客户端（Web 浏览器 / App / SDK）经 **HTTP** 访问 → Bucket 内含多个 Object。
+
+**对象存储特点**：
+- **效率高**：扁平化结构，不受复杂目录/文件夹系统性能下降影响。
+- **访问方便**：支持 HTTP(S)、RESTful API 调用取数；新增 NFS、SMB 支持。
+- **成本低**。
+- **可扩展性高**：可扩展到数十/数百 EB，充分利用高密度存储。
+- **适用场景**：静态或不常变文件（图片、视频、文档）。
+
+**语义定义**：
+- **Bucket（桶）**：对象存储的「桶」，提供**扁平命名空间**。
+- **Object（对象）**：三部分 = **Key**(名称/ID) + **Data**(实际内容) + **Metadata**(元信息，如对象大小)。
+
+**HTTP 接口与 API**：
+- HTTP 接口：任何联网设备随时随地上传/下载；任何支持 HTTP 的客户端可访问。
+- API 速览：
+  | 接口 | 作用 |
+  |------|------|
+  | `PUT` | 上传对象 |
+  | `GET` | 下载对象 |
+  | `HEAD` | 获取对象元信息 |
+  | `DELETE` | 删除对象 |
+  | `MultiPartUpload` | 分块上传，优化大对象弱网环境 |
+  | `ListPrefix` | 分页列举对象 |
+
+易考点：
+- RGW 栈：S3/Swift API → radosgw → librados → OSD/MON。
+- 对象 = Key + Data + Metadata；Bucket = 扁平命名空间。
+- 特点：扁平高效、HTTP(S)/RESTful（+NFS/SMB）、低成本、可扩 EB、适合静态文件。
+- API：PUT/GET/HEAD/DELETE/MultiPartUpload/ListPrefix。
 
 ### 4.2 文件存储协议 CephFS
 > 待补充：CephFS 是 POSIX 兼容文件系统；MDS 元数据、客户端挂载、数据路径等。
