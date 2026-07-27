@@ -621,7 +621,37 @@ for each item:
 - RGW/CephFS/RBD 都基于 librados+osdc，冗余与底层由 RADOS 管。
 
 ### 3.5 子系统间的协作关系
-> 待补充：MON/MGR/OSD/LibRADOS 之间如何协作。
+
+**整体架构（配图）**：
+- **MON**：Paxos 状态机（mon.a/b/c，各维护 epoch、osdmap）。
+- **MGR**：Active-Standby（mgr.a/b/c）。
+- **OSD**：PG 状态机，按 CRUSH map 层级 `root → rack → host → osd` 组织。
+- **客户端栈**：`osdc`、`librados`；接入协议 `rgw`(对象)/`rbd`(块)/`cephfs`(文件)；用户经客户端访问。
+
+**① 状态上报与 Map 更新**：
+1. **OSD** 周期性把自身容量和主 PG 状态上报给主 **MGR**。
+2. **MGR** 汇总所有 OSD 的容量与 PG 信息，发给 **MON**。
+3. **MON** 通过 **Paxos** 共识算法更新 **PGMap**。
+
+**② 故障检测与传播**：
+- a. **OSD-OSD** 与 **OSD-MON** 通过网络心跳互相监控。
+- b. OSD 异常/故障时，**MON** 经 Paxos 更新 **OSDMap** 并标记该 OSD 为 **down**。
+- c. MON 把更新后的 OSDMap 下发给**部分 OSD**。
+- d. OSD 之间再通过心跳**互相传播** OSDMap。
+- e. OSD 收到 OSDMap 后交给 **PG 状态机**。
+- f. 若 CRUSH 算出的 OSD 因故障而变化，PG 进入 **Peering**；主与副本协商解决分歧、达成一致。
+- g. PG Peering 完成后开始**数据恢复**。
+
+**③ 客户端数据访问路径**：
+1. 用户经客户端访问云存储。
+2. 客户端从 **MON** 取 **OSDMap**；用哈希函数 + **CRUSH** 算出 **PGID** 和具体 **OSD**；经服务网络把请求发给 **Primary OSD**。
+3. Primary OSD 从网络收到对象数据，封装为 **PG 事务**，再（按多副本或纠删码）转为 **Object 事务**处理落盘。
+
+易考点：
+- 状态上报链：OSD→MGR→MON(Paxos 更新 PGMap)。
+- 故障链：心跳检测→MON 改 OSDMap(down)→增量下发→OSD 互传→PG 状态机→CRUSH 变则 Peering→恢复。
+- 客户端访问：取 OSDMap→哈希算 PGID→CRUSH 算 OSD→发 Primary OSD→封装 PG 事务→副本/EC 落盘。
+- 三大协议 rgw/rbd/cephfs 都经 librados+osdc。
 
 ## 四、Ceph 存储协议
 > 待补充：预计涵盖 CephFS / RBD / RadosGW 三大接口及协议类型。
