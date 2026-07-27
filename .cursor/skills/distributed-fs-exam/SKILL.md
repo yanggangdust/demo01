@@ -163,6 +163,33 @@ description: >-
 
 易考点：纠删码 = $k$ 数据 + $m$ 校验，可恢复 $m$ 块丢失；RAID-5≈$k+1$，RAID-6≈$k+2$。相比多副本更省存储空间。
 
+#### 2.5.2 一致性协议（PAXOS / RAFT）
+
+**背景**：为保证多个副本间数据一致性，分布式存储通常用 **PAXOS、RAFT** 等分布式协议来同步各副本数据。
+
+**Raft 节点三种状态**：
+| 状态 | 说明 |
+|------|------|
+| **Follower** | 所有节点起始状态；收不到 Leader 消息则转为 Candidate |
+| **Candidate** | 向其他节点**拉票**；获**过半选票**则成为 Leader（**Leader 选举**） |
+| **Leader** | 所有修改都经 Leader；每次变更记为一条**日志条目** |
+
+**状态转换（配图）**：
+- Follower → Candidate：**随机超时结束**
+- Candidate → Leader：**获取过半选票**成为 Leader
+- Leader → Follower：**发现更高任期 / 心跳超时**
+- Candidate → Follower：**发现更高任期**
+- 通信：Candidate ↔ Follower = **投票请求/响应**；Leader ↔ Follower = **日志复制/心跳**
+
+**日志复制流程**（Leader 收到修改请求后）：
+1. **复制条目**：Leader 把日志条目发给所有 Follower
+2. **过半响应**：**过半节点**响应后日志才**提交**
+3. **通知 Follower**：Leader 通知所有 Follower 日志已提交
+4. **Follower 提交**：所有 Follower 提交该日志
+- 结果：系统达到**一致状态**
+
+易考点：Raft 三态（Follower/Candidate/Leader）、选举靠随机超时+过半票、日志复制靠 Leader 主导+过半确认提交。
+
 ## 三、开源存储产品
 
 > 待补充：预计涵盖 GFS、HDFS、Lustre、GlusterFS、Ceph、FastDFS 等开源分布式文件/存储系统的架构与特点（Master/NameNode、ChunkServer/DataNode、副本放置、读写流程等）。
