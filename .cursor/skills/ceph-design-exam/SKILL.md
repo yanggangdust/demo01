@@ -24,7 +24,22 @@ description: >-
 ## 一、Ceph 的架构
 
 ### 1.1 诞生
-> 待补充：Ceph 的起源、历史背景、创始人/项目由来等。
+
+Ceph 发展时间线：
+
+| 年份 | 事件 |
+|------|------|
+| **2004** | **Sage Weil** 在加州大学圣克鲁兹分校（UCSC）的**博士论文**项目中创立 Ceph；以 **LGPLv2** 开源 |
+| **2006** | 开源项目持续推进（GitHub） |
+| **2011** | **Inktank** 公司成立，通过 **Inktank Ceph Enterprise** 提供专业支持 |
+| **2014** | **Red Hat** 收购 Inktank（2014 年 4 月），Ceph 并入 Red Hat |
+| **2018** | **Linux Foundation** 在柏林 Ceph Day 正式宣布成立 **Ceph Foundation**，支持开源项目 |
+| **2022** | Red Hat 将存储产品组合与团队转给 **IBM**（含 Red Hat Ceph Storage、ODF、Rook、NooBaa） |
+
+易考点：
+- 创始人 **Sage Weil**，源于 UCSC 博士论文；开源协议 **LGPLv2**。
+- 关键公司脉络：Inktank(2011) → Red Hat(2014 收购) → IBM(2022 接手存储)。
+- 治理：**Ceph Foundation**（隶属 Linux Foundation，2018 成立）。
 
 ### 1.2 去中心化的分布式架构
 > 待补充：去中心化设计、无单点故障、数据分布与寻址方式等。
