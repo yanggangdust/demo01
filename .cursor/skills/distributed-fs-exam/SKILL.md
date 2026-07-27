@@ -221,6 +221,27 @@ description: >-
 - 多种接入：POSIX(FUSE)、HDFS(Java SDK)、S3(S3 Gateway)、K8s(CSI)。
 - 元数据用 Redis/TiKV，数据用 S3/OSS 等对象存储。
 
+#### 3.1.1 JuiceFS 数据层级（File → Chunk → Slice → Block）
+
+**层级结构**：
+```
+File → Chunk(≤64MB) → Slice(由写产生) → Block(4MB)
+```
+
+| 层级 | 大小 | 说明 |
+|------|------|------|
+| **Chunk** | 最大 **64MB** | 文件按 64MB 切分；如 chunk_1、chunk_2 各 64MB，chunk_3 为余下 <64MB |
+| **Slice** | — | **由写操作产生**，存在于 chunk 内（chunk_1 含 slice_1，chunk_2 含 slice_2…） |
+| **Block** | 固定 **4MB** | slice 拆成一个或多个 4MB block |
+
+**逻辑 vs 物理**：
+- **Chunk / Slice** = 逻辑概念（管理文件偏移与写）。
+- **Block** = 实际**物理存储单元**，最终上传到对象存储。
+
+**处理流程**：slice → 拆成多个 4MB block → 可选**加密、压缩** → 上传对象存储。
+
+易考点：JuiceFS 数据四级 File→Chunk(64M)→Slice→Block(4M)；Chunk/Slice 逻辑、Block 物理；上传前可加密压缩。
+
 ### 3.2 Ceph 架构简介
 > 待补充：Ceph 架构、RADOS/MON/OSD/MDS、CRUSH 算法、池与 PG、应用场景。
 
