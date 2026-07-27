@@ -262,7 +262,31 @@ File → Chunk(≤64MB) → Slice(由写产生) → Block(4MB)
 > 待补充：Ceph 架构、RADOS/MON/OSD/MDS、CRUSH 算法、池与 PG、应用场景。
 
 ### 3.3 Gluster 架构简介
-> 待补充：Gluster 架构、无中心弹性哈希、Volume 类型、Brick、应用场景。
+
+**架构栈（自上而下）**：
+```
+VFS → I/O Cache → Read Ahead → Distribute/Stripe → Replicate → Client
+   → Networking(TCP/IP / IB RDMA) → Storage Bricks(Client Server + POSIX + Brick)
+```
+- 与 JuiceFS 对比：JuiceFS 走 `User/App → VFS → FUSE → /dev/fuse(虚拟设备)`；Gluster 走 VFS 内核栈。
+
+**核心特点**：
+
+| 维度 | 要点 |
+|------|------|
+| **可扩展与可用性** | 高可扩展、高可用、高性能、水平扩展；**无元数据服务器设计**，消除整体服务**单点故障(SPOF)** |
+| **分布式存储** | 开源分布式文件系统，强水平扩展，支持 **PB 级容量**、**数千客户端** |
+| **网络与命名空间** | 用 **TCP/IP 或 InfiniBand RDMA** 聚合物理分散的存储资源，通过**单一全局命名空间**管理数据 |
+| **数据分布策略** | 采用**弹性哈希算法(Elastic Hash)** + **Stripe** 分布；去除元数据依赖，优化分布、提升访问并发 |
+
+**大/小文件表现**：
+- **大文件**：显著提升存储性能。
+- **小文件**：无元数据服务器设计有效解决传统**元数据瓶颈**问题。
+
+易考点：
+- Gluster = **无元数据服务器**（弹性哈希）→ 无单点故障；单一全局命名空间。
+- 网络：TCP/IP 或 IB RDMA；支持 PB 级、数千客户端。
+- 弹性哈希 + Stripe；大文件性能好，小文件解元数据瓶颈。
 
 ## 四、文件系统应用场景
 
