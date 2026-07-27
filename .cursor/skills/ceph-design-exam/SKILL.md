@@ -70,6 +70,33 @@ Ceph 发展时间线：
 - 两种后端：FileStore(XFS/HDD) vs BlueStore(SSD 优化)。
 - 去中心化：无单点元数据瓶颈，靠 RADOS + CRUSH。
 
+#### 1.2.1 去中心化的 IO 视图
+
+**核心原则**：Client 与 OSD **直接 I/O**，无需每次操作查中心化路由表。
+
+**组件关系（配图）**：
+- **OSD**（顶部集群）：去中心化逻辑磁盘集群。
+- **Client**（底部）：通过 **Librados API** 与 RADOS 集群通信。
+- **Monitor**（右侧，3 个组成集群，无单点故障）：管理少量元数据 **OSDMap**（布局视图）。
+- **Object I/O**：Client ↔ OSD 粗箭头直连（数据面）。
+- **Failure reporting / map distribution**：Monitor ↔ OSD/Client 细箭头（控制面）。
+
+**客户端初始化与读写流程**：
+1. Client 首次启动时从 Monitor 获取 **OSDMap**。
+2. 用哈希函数 + **CRUSH 算法**计算目标 OSD 位置。
+3. 直接与目标 OSD 通信读写数据。
+
+**故障处理**：
+1. 检测到 OSD 故障 → Monitor 在 OSDMap 中标记该 OSD 不可用。
+2. 更新后的 OSDMap **增量（灰度）下发**给所有 Client 和其他 OSD。
+3. 各组件基于新 OSDMap 达成新共识，继续提供服务。
+
+易考点：
+- 去中心化 IO = **Client 直连 OSD**，Monitor 只管 OSDMap（控制面），不参与数据 IO。
+- 首次取 OSDMap → CRUSH 算位置 → 直连 OSD 读写。
+- 故障：Monitor 改 OSDMap → 增量下发 → 全集群重共识。
+- RADOS = OSD + Monitor；Monitor 无单点故障。
+
 ### 1.3 核心问题（分布式存储五大核心问题）
 
 | # | 核心问题 | 机制 |
