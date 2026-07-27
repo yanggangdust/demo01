@@ -340,8 +340,28 @@ VFS → I/O Cache → Read Ahead → Distribute/Stripe → Replicate → Client
 - PFS 做运行时高性能存储，对象存储做冷数据；**透明加载 + 数据预热**减少 IO 等待。
 - PFS 目录 Link 到对象存储 Bucket（如 resnet50→ImageNet、nlp→NLPDataset）。
 
-### 4.2 案例2
-> 待补充：用户发该案例截图后填入（场景、架构、选型、要点）。
+### 4.2 案例2：EDS 服务融合媒体建设（深信服）
+
+**场景**：融合媒体建设，支撑媒体制播全流程。
+
+**架构（自上而下分层）**：
+
+| 层 | 内容 |
+|----|------|
+| **解决方案/媒体层** | 新闻制播、节目制播、专题片制播、融合媒体制播、融合媒体发布、智能媒资、一体化库、媒资归档等 |
+| **应用层** | Docker、Windows、File、APP |
+| **主机层** | 云原生共享存储→Docker；Windows 共享存储→Windows；Linux 共享存储→File；对象存储→APP |
+| **协议层** | **CSI**（云原生）、**CIFS**（Windows）、**NFS**（Linux）、**S3**（对象） |
+| **服务网关层** | **File(NAS)** 处理 CSI/CIFS/NFS；**Object** 处理 S3 |
+| **系统层** | 深信服企业级分布式存储系统 **EDS**（核心软件层，管理底层资源并提供网关服务） |
+| **资源层** | **全闪存硬盘资源池**(SSD) + **混合硬盘资源池**(HDD+SSD) |
+| **X86 通用服务器层** | **横向扩展集群(Scale-out)**，标准 X86 服务器 |
+
+易考点：
+- EDS = **统一分布式存储后端**，一套存储支撑多种负载（容器/Windows/Linux 文件/对象应用）。
+- 协议对应：云原生→CSI、Windows→CIFS、Linux→NFS、对象→S3。
+- 网关分 File(NAS) 与 Object 两类；底层 X86 scale-out 集群 + 全闪/混合资源池。
+- 场景：融合媒体制播与媒资管理。
 
 ## 复习互动方式
 
