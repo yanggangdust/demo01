@@ -347,7 +347,18 @@ FS(EXT3/XFS/…)  FS  未分配
 易考点：常见做法是 `/boot` 用普通分区；`/`、`/home` 用 LV（如 vg0/lv0、vg0/lv1）；流程=建 PV→加 VG→建 LV→格式化挂载。
 
 ### 3.3 常用命令
-> 待补充：pvcreate/vgcreate/lvcreate、扩展缩容、快照等命令。
+
+#### 查看类
+
+| 命令 | 作用 |
+|------|------|
+| `pes` / `pedisplay` | 查看 PE 大小（课件注：pes≈pescan） |
+| `pvs` / `pvdisplay` | 查看物理卷（PV） |
+| `vgs` / `vgdisplay` | 查看卷组（VG） |
+| `lvs` / `lvdisplay` | 查看逻辑卷（LV） |
+| `fdisk -l` | 查看磁盘分区 |
+
+易考点：查看命令对：`pvs/pvdisplay`、`vgs/vgdisplay`、`lvs/lvdisplay`；另可用 `fdisk -l` 看分区。
 
 ## 复习互动方式
 
