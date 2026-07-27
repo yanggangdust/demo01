@@ -77,6 +77,19 @@ description: >-
 
 易考点：设备在 `/dev`；SATA/SSD/SAS→`sd`，IDE→`hd`；分区号 1–4=主/扩展，≥5=逻辑。
 
+#### 规则示例
+
+| 说明 | 名称 |
+|------|------|
+| IDE1 接口第1个硬盘（master）的第1个分区 | `/dev/hda1` |
+| IDE1 接口第2个硬盘（slave）的第1个分区 | `/dev/hdb1` |
+| IDE2 接口第1个硬盘（master）的第3个分区 | `/dev/hdc3` |
+| IDE2 接口第2个硬盘（slave）的第1个逻辑分区 | `/dev/hdd5` |
+| SCSI 接口第1个硬盘（ID=0）的第1个分区 | `/dev/sda1` |
+| SCSI 接口第2个硬盘（ID=1）的第2个逻辑分区 | `/dev/sdb6` |
+
+记忆：IDE 按 a/b/c/d 对应 IDE1 master/slave、IDE2 master/slave；SCSI/SATA 按 a/b…；逻辑分区从 **5** 起（如 hdd5、sdb6）。
+
 ### 1.3 分区工具
 > 待补充：fdisk、parted、gdisk 等分区工具用法与对比。
 
