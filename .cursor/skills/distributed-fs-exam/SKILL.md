@@ -190,9 +190,16 @@ description: >-
 
 易考点：Raft 三态（Follower/Candidate/Leader）、选举靠随机超时+过半票、日志复制靠 Leader 主导+过半确认提交。
 
-## 三、开源存储产品
+## 三、开源存储产品（Part 3）
 
-> 待补充：预计涵盖 GFS、HDFS、Lustre、GlusterFS、Ceph、FastDFS 等开源分布式文件/存储系统的架构与特点（Master/NameNode、ChunkServer/DataNode、副本放置、读写流程等）。
+### 3.1 JuiceFS 架构简介
+> 待补充：JuiceFS 架构、元数据引擎与对象存储分离、POSIX 兼容、适用场景。
+
+### 3.2 Ceph 架构简介
+> 待补充：Ceph 架构、RADOS/MON/OSD/MDS、CRUSH 算法、池与 PG、应用场景。
+
+### 3.3 Gluster 架构简介
+> 待补充：Gluster 架构、无中心弹性哈希、Volume 类型、Brick、应用场景。
 
 ## 四、文件系统应用场景
 
