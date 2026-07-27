@@ -593,8 +593,32 @@ for each item:
 - up vs acting 可不同；primary 向 MON 上报差异。
 - Primary 走 Peering(GetInfo/GetLog/...)→Active；Replica 走 Stray→ReplicaActive。
 
-### 3.4 LibRADOS
-> 待补充：LibRADOS 库、客户端与 RADOS 交互。
+### 3.4 LibRADOS（librados 与 osdc）
+
+**客户端接口**：上层应用访问 Ceph 的入口，支持**多事务原子操作**和扩展对象数据（**xattr/kv**）。
+
+**模块组成**：客户端由 **Librados** 和 **Osdc** 组成；**Cls** 扩展模块基于它们扩展已有接口。
+
+**Librados**：RADOS 对象存储的接口库，提供基本操作：建/删 pool，建/删/读/写对象。
+- **Rados**：`connect`、`pool_create`、`pool_lookup`、`pool_list`、`cluster_fsid`、`shutdown`、`pool_delete`、`ioctx_create`、`get_pool_stats`、`cluster_stat`。
+- **IoCtxImpl**：某个 pool 的上下文信息，**一个 pool 对应一个 IoCtxImpl 对象**；处理该 pool 内同步/异步对象操作（`create`/`write_full`/`read`/`remove`/`setxattr`/`rmxattr`/`append`/`write`/`stat`/`trunc`/`getxattr`/`watch/notify`）。
+
+**OSDC 核心功能**：
+- 封装操作数据。
+- 拆分对象（Striper 负责条带）。
+- 获取 **OSDMap**。
+- 哈希计算对象所属 **PG**。
+- 用 **CRUSH** 计算 PG 目标 **OSD 地址**。
+- 发网络请求并处理超时。
+- **Objecter**：`_calc_target`、`ObjectOperation`、`handle_osd_map`、`OSDSession`、`OSDOp`、`ObjectCacher`。
+
+**上层应用（RGW / CephFS / RBD）**：三大存储协议都构建在 **librados + osdc** 之上；协议层无需关心冗余策略或底层对象逻辑，可靠/可用/可扩展由 RADOS 管理，简化开发。
+
+易考点：
+- 客户端 = Librados + Osdc（+ Cls 扩展）；接口支持原子事务 + xattr。
+- 一个 pool = 一个 IoCtxImpl；Librados 管 pool/对象增删读写。
+- OSDC 流程：封装→拆对象→取 OSDMap→哈希算 PG→CRUSH 算 OSD→发请求/超时处理。
+- RGW/CephFS/RBD 都基于 librados+osdc，冗余与底层由 RADOS 管。
 
 ### 3.5 子系统间的协作关系
 > 待补充：MON/MGR/OSD/LibRADOS 之间如何协作。
