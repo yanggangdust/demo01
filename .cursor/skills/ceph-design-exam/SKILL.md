@@ -736,8 +736,30 @@ for each item:
 - 客户端类型：原生(Kernel/FUSE)、NFS、SMB/CIFS。
 - 挑战：POSIX 语义正确 + 元数据可扩展。
 
-### 4.3 块存储协议 RBD
-> 待补充：RBD（RADOS Block Device）提供块存储给虚拟机/裸机；image、条带、数据路径等。
+### 4.3 块存储协议 RBD（iSCSI / 磁盘）
+
+**块存储五大特点**：
+1. **定长数据块**：以固定大小单元读写（通常 512B 或 4KB），高效精确。
+2. **随机访问**：支持随机访问，可直接读写任意数据块，无需顺序访问；适合文件系统、数据库等负载。
+3. **快照与克隆**：支持快照和克隆，用于备份、恢复、复制，提升可靠性与可用性。
+4. **虚拟化支持**：块设备可虚拟化，映射为虚拟机或容器的存储。
+5. **iSCSI 支持**：支持 iSCSI 标准协议，直接经网络访问 RBD。
+
+**架构栈**：
+
+| 栈 | 层级 |
+|----|------|
+| **Kubernetes 栈** | Kubernetes → **ceph-csi**(CSI) →（Kernel 模块 / rbd-nbd / librbd）→ RADOS 协议 → OSDs/Monitors |
+| **OpenStack 栈** | OpenStack → **libvirt** → QEMU → **librbd** → **librados** → OSDs/Monitors |
+
+**iSCSI 网络访问**：
+- 集群网络（可选）→ OSD 层（OSD1/2/3/N）→ **RBD Image** → 公共网络 → **iSCSI GW RBD 模块（网关）** → **iSCSI Initiator**（各操作系统）。
+- Initiator 经公共网络、通过 RBD Image 逻辑访问 OSD。
+
+易考点：
+- RBD 五特点：定长块(512B/4KB)、随机访问、快照克隆、虚拟化映射、iSCSI。
+- K8s 走 ceph-csi（Kernel/librbd/rbd-nbd）；OpenStack 走 libvirt→QEMU→librbd→librados。
+- iSCSI 经网关（iSCSI GW RBD 模块）让 Initiator 经公共网络访问 RBD Image→OSD。
 
 ## 五、Ceph 开源社区
 > 待补充：预计涵盖社区检索学习资料、版本/文档获取等。
