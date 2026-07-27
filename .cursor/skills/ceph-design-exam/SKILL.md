@@ -696,8 +696,45 @@ for each item:
 - 特点：扁平高效、HTTP(S)/RESTful（+NFS/SMB）、低成本、可扩 EB、适合静态文件。
 - API：PUT/GET/HEAD/DELETE/MultiPartUpload/ListPrefix。
 
-### 4.2 文件存储协议 CephFS
-> 待补充：CephFS 是 POSIX 兼容文件系统；MDS 元数据、客户端挂载、数据路径等。
+### 4.2 文件存储协议 CephFS（NAS）
+
+**架构栈**：
+- 顶层：CephFS 分布式文件系统。
+- 客户端接入：
+  - **Linux**：内核客户端(Kernel) 或 用户态客户端(FUSE)
+  - **MacOS**：NFS-ganesha
+  - **Windows**：SAMBA/CIFS
+- 中间库：客户端经 **Libcephfs**（位于 **Librados** 之上）。
+- 核心组件：**OSDs**、**MDSs**、**Monitors**。
+
+**操作流程**：
+- **元数据操作**（`open`/`mkdir`/`listdir`）：客户端直接与 **Active MDS** 交互。
+- **数据操作**（`read`/`write`）：客户端直接与 **OSD** 交互，**绕过 MDS** 以获高性能。
+- **MDS 冗余/扩展**：Active MDS 与 Journal 交互；Standby MDS 接收「元数据交换」；另一 Active MDS 做「元数据变更」并「Journal Flush」到存储。
+
+**关键技术概念**：
+- **设计哲学**：文件系统用层级树结构组织目录，符合人类思维，便于数据组织。
+- **复杂度对比**：文件系统访问接口远多于对象存储；分布式文件系统的挑战是**保证 POSIX 语义正确性的同时最大化元数据可扩展性**。
+- **Ceph MDS**：
+  - 通过状态机实现**动态子树(dynamic subtrees)**。
+  - 管理所有元数据（文件/目录属性、权限、位置）。
+  - MDS 状态机维护目录结构，保证多 MDS 节点修改时的一致性。
+
+**CephFS 客户端类型**：
+- **原生客户端**：Linux 内核态(Kernel) + 用户态(FUSE)。
+- **NFS 协议客户端**：Linux/Unix 类系统间文件共享。
+- **SMB/CIFS 协议客户端**：Linux 与 Windows 间文件共享。
+
+**POSIX 接口**：`open`/`read`/`seek`/`link`/`close`/`write`/`truncate`/`unlink`/`create`/`fallocate`/`flock`/`stat`/`opendir`/`mkdir`/`readdir`/`symlink`/`rmdir`/`fsync`/`readlink`。
+
+**动态子树元数据分布**：把目录树不同部分分配给不同 MDS（如 MDS 0/1/3/4），通过**分区目录树到多个 active 服务器**来扩展元数据能力。
+
+易考点：
+- 架构栈：客户端(Kernel/FUSE/NFS-ganesha/SAMBA)→Libcephfs→Librados→OSD/MDS/MON。
+- 元数据走 MDS、数据直走 OSD（绕 MDS 高性能）。
+- MDS 用动态子树状态机管元数据、保多节点一致；动态子树分区目录树实现元数据扩展。
+- 客户端类型：原生(Kernel/FUSE)、NFS、SMB/CIFS。
+- 挑战：POSIX 语义正确 + 元数据可扩展。
 
 ### 4.3 块存储协议 RBD
 > 待补充：RBD（RADOS Block Device）提供块存储给虚拟机/裸机；image、条带、数据路径等。
