@@ -188,7 +188,25 @@ Ceph 发展时间线：
 易考点：路径 6 哈希分片的扩容问题（找不到+不均衡）→ CRUSH 解决；大文件 → 切 4MB 对象；元数据由谁管 → 引出 Ceph 组件。
 
 ### 2.2 逻辑概念
-> 待补充：Ceph 封装的逻辑概念（Pool、PG、OSD、Object 等及其关系）。
+
+**核心：Ceph 数据映射四级层级** `File → Objects → PGs → OSDs`
+
+| 层级 | 映射逻辑 | 说明 |
+|------|----------|------|
+| **File** | — | 用户文件，被切分成多段 |
+| **Objects** | `(ino, ono) -> oid` | 文件按 inode号(ino)、对象序号(ono) 切成多个对象，每个分配唯一对象 ID(oid) |
+| **PG（Placement Group）** | `hash(oid) & mask -> pgid` | 对 oid 哈希后与掩码相与得到 PG ID；PG 是逻辑分组，用于扩展元数据管理 |
+| **OSD** | `CRUSH(pgid) -> (osd1, osd2)` | CRUSH 算法由 pgid 算出落到哪些物理 OSD（按故障域分组），多 OSD 即副本冗余 |
+
+**关键要点**：
+- **工作流**：File → Objects → PGs → OSDs。
+- **解耦**：在 Object 与 OSD 之间引入 **PG**，使系统可扩展、可再均衡，**无需为每个对象维护中心化查表**。
+- **CRUSH**：把逻辑 PG 映射到物理 OSD，按**故障域**（如机架/主机）放置，保证高可用。
+
+易考点：
+- 四级映射及对应公式：`(ino,ono)->oid`、`hash(oid)&mask->pgid`、`CRUSH(pgid)->(osd1,osd2)`。
+- PG 的作用 = 扩展元数据管理 + 解耦对象与 OSD。
+- CRUSH 按故障域选 OSD → 副本分布保证高可用。
 
 ### 2.3 CAP 原理
 
