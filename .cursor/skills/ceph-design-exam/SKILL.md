@@ -292,6 +292,39 @@ Ceph 发展时间线：
 - 大集群用**增量 map** 优化传输。
 - 对外服务经 **POOL**；OSDMap 五大结构（Cluster/CRUSH/POOL/PG/OSD）。
 
+### 3.3 Paxos 共识算法
+
+**定义**：Paxos 解决多节点如何对一个提案达成共识；提案号需**全局单调递增**。
+
+**三种角色**：**Proposer（提议者）**、**Acceptor（接受者）**、**Learner（学习者）**。
+- 角色特点：更新交互多、效率低、**强一致性、无脑裂**。
+
+**Quorum（多数派）原理**：任意两个「超过半数节点」的子集必有交集 → 提供容错，解决 2PC 的无限等待、脑裂、数据一致性问题。
+
+**防活锁**：选出一个主 Proposer（Leader）避免活锁。
+
+#### Basic Paxos 流程（两阶段）
+1. Proposer 选新提案号 $n$。
+2. Proposer 向所有节点广播 `Prepare(n)`。
+3. Acceptor 响应：若 $n > \text{minProposal}$，则 $\text{minProposal}=n$，返回当前 `(acceptedProposal, acceptedValue)`。
+4. Proposer 收到多数响应后：若有返回的 acceptedValue，则用最高 acceptedProposal 对应的 acceptedValue 替换当前 value。
+5. Proposer 广播 `Accept(n, value)`。
+6. Acceptor 响应：若 $n \ge \text{minProposal}$，则 $\text{acceptedProposal}=\text{minProposal}=n$、$\text{acceptedValue}=\text{value}$，返回 minProposal。
+
+#### Multi Paxos vs Basic Paxos
+- **核心改进**：Multi Paxos 增加 **Leader 选举（选主）**。
+- **心跳**：节点周期性心跳判断网络中是否存在主提议节点。
+- **选举**：无主时，节点用 Basic Paxos 两轮（Prepare/Accept）广播竞选；多数同意则成为 Leader。
+- **主权限**：选出后**只有 Leader 能提议**（直到其故障触发重新选举）。
+- **请求转发**：其他节点收到客户端请求会**转发给 Leader**。
+- **效率**：Leader 确定后，后续提议**不必每次重复 Prepare 阶段**，视为同一提案 ID 下的一系列批准。
+
+易考点：
+- 三角色 Proposer/Acceptor/Learner；Quorum 多数派交集原理 → 解决 2PC 脑裂/无限等待。
+- Basic Paxos 两阶段 Prepare/Accept；提案号单调递增。
+- Multi Paxos = Basic + Leader 选举；选主后省 Prepare，效率提升。
+- 特点：强一致、无脑裂，但交互多、效率低。
+
 ## 四、Ceph 存储协议
 > 待补充：预计涵盖 CephFS / RBD / RadosGW 三大接口及协议类型。
 
