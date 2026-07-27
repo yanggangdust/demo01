@@ -193,7 +193,33 @@ description: >-
 ## 三、开源存储产品（Part 3）
 
 ### 3.1 JuiceFS 架构简介
-> 待补充：JuiceFS 架构、元数据引擎与对象存储分离、POSIX 兼容、适用场景。
+
+**核心特点**：**元数据与数据解耦**——元数据存数据库，文件内容存对象存储。
+
+**三大功能区**：
+
+#### 客户端（Client）
+| 接入方式 | 协议 | 对接组件 |
+|------|------|------|
+| 通用应用（Linux/Win/macOS） | POSIX、SMB/CIFS、NFS | **FUSE** |
+| Hadoop | Java API | **Java SDK** |
+| Kubernetes | CSI | **CSI Driver** |
+| Web 应用 | HTTP | **S3 Gateway** |
+
+这些组件都位于统一的 **JuiceFS** 核心层之上。
+
+#### 元数据引擎（目录结构）
+- 经 **TLS** 连接，存目录结构与文件元数据。
+- 支持：**Redis**、**TiKV**（量级最大）、MariaDB、PostgreSQL 等。
+
+#### 数据存储（文件内容）
+- 经 **HTTPS** 连接，文件内容按 chunk 存储。
+- 支持：**S3**、GCS、Azure Blob、阿里云 OSS、腾讯云 COS、**Ceph**、MinIO、百度 BOS 等。
+
+易考点：
+- JuiceFS = **元数据(数据库) + 数据(对象存储) 解耦**架构。
+- 多种接入：POSIX(FUSE)、HDFS(Java SDK)、S3(S3 Gateway)、K8s(CSI)。
+- 元数据用 Redis/TiKV，数据用 S3/OSS 等对象存储。
 
 ### 3.2 Ceph 架构简介
 > 待补充：Ceph 架构、RADOS/MON/OSD/MDS、CRUSH 算法、池与 PG、应用场景。
