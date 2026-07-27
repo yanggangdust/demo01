@@ -255,7 +255,42 @@ Ceph 发展时间线：
 易考点：CAP 三选二；P 在分布式下必选 → 实际是 CP/AP 取舍；CP 牺牲可用、AP 牺牲一致（最终一致）；AC 需完美网络→单区域→非分布式。
 
 ## 三、Ceph RADOS 子系统
-> 待补充：预计涵盖 RADOS、MON/OSD/MGR 等组件作用与协作、读写流程等。
+
+### 3.1 （待补充）
+> 待补充：RADOS 概述、组件协作、读写流程等。
+
+### 3.2 OSDMap
+
+**查看命令**：
+- `ceph osd dump`：查看 OSDMap 当前状态（epoch、fsid、时间戳、flags、各 pool 配置、OSD 状态）。
+- `ceph osd tree`：查看集群物理/逻辑层级（root → host → osd），含 ID、CLASS(ssd)、WEIGHT、TYPE、NAME、STATUS、REWEIGHT。
+
+**关键概念**：
+- 集群表（Cluster Map）主要由两部分组成：
+  1. **集群拓扑 + CRUSH 规则**（用于数据定位/寻址计算）。
+  2. **所有 OSD 的身份与状态信息**。
+- **epoch 单调递增**；集群所有变更（OSD 上下线）按逻辑时间线**串行处理**。
+- OSDMap 的强一致性与高可用由 **Paxos 分布式共识算法**保证。
+- Ceph 通过 **POOL** 对外提供存储服务（而非直接经 OSD/PG），故 OSDMap 记录所有用户创建 pool 的详细信息。
+- OSDMap 跟踪每个 OSD 状态；大集群中编码后 Map 会膨胀；除首次全量 OSDMap 外，后续更新以**增量 map（diff）**下发以优化传输。
+
+**OSDMap 数据结构（五大部分）**：
+
+| 部分 | 字段 |
+|------|------|
+| **Cluster（集群元数据）** | epoch、fsid、created/modified 时间戳、blacklist(客户端黑名单)、EC 模板、flags(noout/noscrub…) |
+| **CRUSH** | CRUSH Map、CRUSH Rules、root/rack/host/osd 层级、CRUSH 调试参数、各层级 crush_weight |
+| **POOL** | pools 列表、pool_name 列表、pool_max、type(副本/EC)、opts、pg_num/pgp_num、object_hash 算法、quota_max_bytes/objects |
+| **PG** | pg_temp、primary_pg_temp、pg_upmap、pg_upmap_item |
+| **OSD** | osd_state、osd_info、osd_weight、osd_addrs、osd_uuid、osd_xinfo、osd_primary_affinity、max_osd |
+
+**利用率阈值**：`full_ratio 0.95`、`backfillfull_ratio 0.9`、`nearfull_ratio 0.85`。
+
+易考点：
+- OSDMap 两部分 = 拓扑+CRUSH规则 / OSD身份状态。
+- epoch 单调递增、变更串行；一致性靠 **Paxos**。
+- 大集群用**增量 map** 优化传输。
+- 对外服务经 **POOL**；OSDMap 五大结构（Cluster/CRUSH/POOL/PG/OSD）。
 
 ## 四、Ceph 存储协议
 > 待补充：预计涵盖 CephFS / RBD / RadosGW 三大接口及协议类型。
