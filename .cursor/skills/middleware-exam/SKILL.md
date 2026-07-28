@@ -934,6 +934,43 @@ Region 1                          Region 2（中立协调）
 - **双 HAProxy + 轮询** = 入口层高可用
 - **三 Manager**（2 数据节点 + 1 中立协调）= 集群协调/选主
 
+#### 安装和配置 HAProxy
+
+**yum 在线安装**
+
+```bash
+yum install epel-release -y
+yum install haproxy -y
+systemctl start haproxy && systemctl status haproxy
+```
+
+**默认配置文件**
+
+- `/etc/haproxy/haproxy.cfg`
+
+**systemctl status 输出要点（node164 示例）**
+
+- 服务名：`haproxy.service - HAProxy Load Balancer`
+- 状态：**active (running)**
+- 主进程：`haproxy-systemd-wrapper -f /etc/haproxy/haproxy.cfg -p /run/haproxy.pid`
+- worker：`/usr/sbin/haproxy -f /etc/haproxy/haproxy.cfg ...`
+
+**现网 HAProxy 部署标准（课件）**
+
+| 项 | 路径/命令 |
+|----|-----------|
+| 安装部署路径 | `/apps/svr/haproxy` |
+| 启停管理 | `sudo /apps/sh/haproxy.sh start\|stop\|restart\|status` |
+| 日志目录 | `/apps/logs/haproxy` |
+
+**易考点**
+
+| 对比 | yum 安装 | 现网标准 |
+|------|----------|----------|
+| 配置 | `/etc/haproxy/haproxy.cfg` | 自定义部署路径 |
+| 管理 | `systemctl` | `/apps/sh/haproxy.sh` |
+| 依赖 | 需 **epel-release** | 同左 + 路径/日志标准化 |
+
 ### 2.4 Keepalived ★
 > 待补充
 
@@ -968,4 +1005,4 @@ Region 1                          Region 2（中立协调）
 
 ---
 
-**进度说明：** 第一章 ✅；2.1 Nginx ✅；2.2 Tomcat ✅；2.3 HAProxy（MySQL 多 AZ 架构）已录入；2.4 及第三、四章待截图补充。
+**进度说明：** 第一章 ✅；2.1 Nginx ✅；2.2 Tomcat ✅；2.3 HAProxy（架构 + 安装配置）✅；2.4 及第三、四章待截图补充。
