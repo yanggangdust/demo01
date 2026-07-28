@@ -1113,6 +1113,38 @@ MySQL（120）  ←—— repl ——→  MySQL（121）
 - Master 降 Backup：收到**更高优先级** VRRP 报文
 - shutdown → 回到 **Initialize**
 
+#### VRRP 各状态说明
+
+**1. Initialize（初始化）**
+
+- VRRP **不可用**状态
+- **不处理**任何 VRRP 报文
+- 典型进入场景：**刚启动**；或**检测到故障**后
+
+**2. Master**
+
+| 行为 | 说明 |
+|------|------|
+| **发送 VRRP 通告报文** | 按 **Advertisement_Interval** 周期发送 |
+| **应答 ARP** | 对 VIP 的 ARP 请求，用**自身 MAC** 应答 |
+| **转发 IP 报文** | 目的 MAC 为**虚拟 MAC** 的报文 |
+| **接收 IP 报文** | 目的 IP 为 **VIP** 的报文才接收；否则**丢弃** |
+
+**3. Backup**
+
+- **接收 Master 发送的 VRRP 通告报文**
+- 据此判断 **Master 状态是否正常**
+- 若超时未收到 hello → 竞选升为 **Master**（见上节状态转换）
+
+**Master vs Backup 对比（易考点）**
+
+| | Master | Backup |
+|---|--------|--------|
+| 发 VRRP 通告 | ✅ 周期性发送 | ❌ 只接收 |
+| 应答 VIP 的 ARP | ✅ | ❌ |
+| 转发/接收 VIP 流量 | ✅ | ❌（待命） |
+| 监控 Master | — | ✅ 收通告判断 Master 健康 |
+
 ## 三、缓存中间件架构与运维
 
 > 涵盖：Redis、Memcached。
@@ -1144,4 +1176,4 @@ MySQL（120）  ←—— repl ——→  MySQL（121）
 
 ---
 
-**进度说明：** 第一章 ✅；第二章 Web 中间件（2.1–2.4，Keepalived 含 VRRP 概念+机制）✅；第三、四章待截图补充。
+**进度说明：** 第一章 ✅；第二章 Web 中间件（2.1–2.4，Keepalived/VRRP 完整）✅；第三、四章待截图补充。
