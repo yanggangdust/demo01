@@ -998,6 +998,58 @@ systemctl start haproxy && systemctl status haproxy
 - **1.2 数据库集群 1**：Keepalived 监控本机 MySQL，异常时 **VIP 迁移**
 - **HAProxy/Nginx**：常与 Keepalived 组合实现入口层高可用（主备 + VIP）
 
+#### MySQL 主从 + Keepalived 实验环境（课件）
+
+> 与 **1.2 数据库集群 1** 同一架构；本节补充实验 IP、复制验证命令。
+
+**架构（实验 IP）**
+
+```
+APP → VIP 192.168.205.193
+        ↓
+keepalived master ←→ keepalived slave
+        ↓                    ↓
+MySQL master              MySQL master
+192.168.205.120           192.168.205.121
+        ←—— repl ——→
+```
+
+- Keepalived **监控本机 MySQL** 是否正常
+- 复制：**单向或双向**；根据切换情况**互为主从**
+
+**/etc/hosts（node121 示例）**
+
+```
+192.168.205.120  node120.centos.com  node120
+192.168.205.121  node121.centos.com  node121
+```
+
+**复制状态验证（node121）**
+
+```sql
+-- 主库进程（node120 上 show processlist）
+-- repl 用户来自 192.168.205.121，Command: Binlog Dump GTID
+-- State: Master has sent all binlog to slave; waiting for more updates
+
+-- 从库状态（node121）
+SHOW SLAVE STATUS\G
+-- Master_Host: 192.168.205.120
+-- Master_User: repl
+-- Master_Port: 3306
+-- Slave_IO_Running: Yes
+-- Slave_SQL_Running: Yes   ← 复制正常
+```
+
+**易考点**
+
+| 检查项 | 正常值 |
+|--------|--------|
+| `Slave_IO_Running` | **Yes** |
+| `Slave_SQL_Running` | **Yes** |
+| 复制方式 | **GTID**（Binlog Dump GTID） |
+| 复制用户 | `repl` |
+| VIP | 应用只连 **192.168.205.193**，不直连 120/121 |
+
 ## 三、缓存中间件架构与运维
 
 > 涵盖：Redis、Memcached。
@@ -1029,4 +1081,4 @@ systemctl start haproxy && systemctl status haproxy
 
 ---
 
-**进度说明：** 第一章 ✅；2.1 Nginx ✅；2.2 Tomcat ✅；2.3 HAProxy（架构 + 安装配置）✅；2.4 及第三、四章待截图补充。
+**进度说明：** 第一章 ✅；第二章 Web 中间件（2.1–2.4，Keepalived 介绍 + MySQL HA 实验）✅；第三、四章待截图补充。
