@@ -998,57 +998,61 @@ systemctl start haproxy && systemctl status haproxy
 - **1.2 数据库集群 1**：Keepalived 监控本机 MySQL，异常时 **VIP 迁移**
 - **HAProxy/Nginx**：常与 Keepalived 组合实现入口层高可用（主备 + VIP）
 
-#### MySQL 主从 + Keepalived 实验环境（课件）
+#### Keepalived 组件作用举例 — MySQL 主从 + Keepalived 高可用
 
-> 与 **1.2 数据库集群 1** 同一架构；本节补充实验 IP、复制验证命令。
+> 与 **1.2 数据库集群 1** 同一架构；Keepalived 的作用：**监控本机 MySQL + 管理 VIP 漂移**。
 
-**架构（实验 IP）**
+**Keepalived 在架构中的角色**
+
+| 层级 | 组件 | 作用 |
+|------|------|------|
+| 应用 | APP | 只连接 **VIP**，不感知后端切换 |
+| 高可用 | Keepalived master/slave | **监控本机 MySQL**；维护 **VIP 192.168.205.193**；故障时漂移 |
+| 数据 | MySQL 120 ↔ 121 | **repl** 主从复制；可单向/双向，切换后互为主从 |
+
+**架构图（实验 IP）**
 
 ```
 APP → VIP 192.168.205.193
         ↓
 keepalived master ←→ keepalived slave
         ↓                    ↓
-MySQL master              MySQL master
-192.168.205.120           192.168.205.121
-        ←—— repl ——→
+MySQL（120）  ←—— repl ——→  MySQL（121）
 ```
 
-- Keepalived **监控本机 MySQL** 是否正常
-- 复制：**单向或双向**；根据切换情况**互为主从**
-
-**/etc/hosts（node121 示例）**
+**/etc/hosts**
 
 ```
 192.168.205.120  node120.centos.com  node120
 192.168.205.121  node121.centos.com  node121
 ```
 
-**复制状态验证（node121）**
+**复制状态验证（演示环境 node121）**
 
 ```sql
--- 主库进程（node120 上 show processlist）
--- repl 用户来自 192.168.205.121，Command: Binlog Dump GTID
+-- 主库 node120：SHOW PROCESSLIST\G
+-- User: repl | Host: 192.168.205.121:39814
+-- Command: Binlog Dump GTID
 -- State: Master has sent all binlog to slave; waiting for more updates
 
--- 从库状态（node121）
-SHOW SLAVE STATUS\G
+-- 从库 node121：SHOW SLAVE STATUS\G
+-- Slave_IO_State: Waiting for master to send event
 -- Master_Host: 192.168.205.120
--- Master_User: repl
--- Master_Port: 3306
+-- Master_User: repl | Master_Port: 3306
+-- Master_Log_File: mysql-bin.000004
 -- Slave_IO_Running: Yes
--- Slave_SQL_Running: Yes   ← 复制正常
+-- Slave_SQL_Running: Yes
 ```
 
-**易考点**
+**健康判断速记**
 
-| 检查项 | 正常值 |
-|--------|--------|
+| 检查项 | 正常 |
+|--------|------|
 | `Slave_IO_Running` | **Yes** |
 | `Slave_SQL_Running` | **Yes** |
-| 复制方式 | **GTID**（Binlog Dump GTID） |
-| 复制用户 | `repl` |
-| VIP | 应用只连 **192.168.205.193**，不直连 120/121 |
+| 主库 State | all binlog sent, waiting for updates |
+| 复制协议 | **GTID** |
+| VIP | **192.168.205.193**（应用唯一入口） |
 
 ## 三、缓存中间件架构与运维
 
