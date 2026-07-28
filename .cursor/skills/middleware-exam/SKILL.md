@@ -1632,7 +1632,45 @@ telnet localhost 50001
 > 注：1.3 课件另列 **Zookeeper**（分布式中间件），若后续有 ZK 专章截图再补充。
 
 ### 4.1 Kafka 简介 ★
-> 待补充
+
+#### 什么是 Kafka
+
+**定义**
+
+- Kafka 是一种**分布式的**、基于**发布/订阅**的消息系统
+
+**架构组件（课件）**
+
+```
+Producer × N  ──→  Topics  ──→  Kafka Cluster（Broker × N）
+                                        │
+                                   Zookeeper（协调）
+                                        │
+                                        ↓ Messages
+                                  Consumer × N
+```
+
+| 组件 | 作用 |
+|------|------|
+| **Producer** | **生产者**；向指定 **Topic** 发布/发送消息 |
+| **Topic** | 消息**主题/分类**；Producer 写入、Consumer 订阅 |
+| **Kafka Cluster** | Kafka **集群**；由多个 **Broker** 组成 |
+| **Broker** | 集群中的**单个节点/服务器** |
+| **Zookeeper** | **协调服务**；管理 Kafka 集群元数据与状态 |
+| **Consumer** | **消费者**；从集群**拉取/接收 Messages** |
+
+**数据流向**
+
+1. **Producer** → **Topic** → **Kafka Cluster（Broker）**
+2. **Consumer** ← **Messages** ← **Kafka Cluster**
+3. **Zookeeper** ↔ **Kafka Cluster**（集群协调）
+
+**易考点**
+
+- Kafka = **分布式** + **发布/订阅（Pub/Sub）**
+- **Topic** 是消息逻辑分类，不是物理单点
+- **Broker** = 集群节点；**Zookeeper** = 协调（与 1.3 分布式中间件呼应）
+- 与 Redis 消息队列区别：Kafka 是**专业分布式消息系统**，持久化、高吞吐
 
 ### 4.2 Kafka 基础操作 ★
 > 待补充
@@ -1648,4 +1686,4 @@ telnet localhost 50001
 
 ---
 
-**进度说明：** 第一、二、三章 ✅；第四章骨架已建（4.1 Kafka 简介、4.2 Kafka 基础操作）；待截图填充。
+**进度说明：** 第一、二、三章 ✅；4.1 Kafka 简介 ✅；4.2 及 Zookeeper 待截图补充。
