@@ -472,6 +472,37 @@ netstat -anlp | grep nginx
 - 排查端口：`netstat -anlp | grep nginx`
 - 生产环境常用**自定义脚本**而非仅 systemctl（路径标准化）
 
+#### Nginx 运维操作（CLI 命令）
+
+| 命令 | 说明 |
+|------|------|
+| `nginx` | 启动 nginx 服务 |
+| `nginx -t` | 检查配置文件语法 |
+| `nginx -T` | 检查配置并**打印完整配置**到标准输出 |
+| `nginx -v` | 查看 nginx **版本** |
+| `nginx -V` | 查看**详细版本 + 编译参数** |
+| `nginx -s reload` | **重载配置**（不中断服务） |
+| `nginx -s quit` | **优雅停止**（不影响已接受请求） |
+| `nginx -s stop` | **立即停止**（中止请求） |
+| `nginx -h` | 显示帮助 |
+
+**终端示例（node164）**
+
+```bash
+which nginx          # /usr/sbin/nginx
+nginx -v             # nginx version: nginx/1.20.1
+nginx -t             # syntax is ok / test is successful
+                     # 配置文件：/etc/nginx/nginx.conf
+```
+
+**易考点**
+
+| 对比 | quit | stop | reload |
+|------|------|------|--------|
+| 行为 | 优雅退出 | 直接退出 | 热加载配置 |
+| 进行中请求 | 处理完毕再停 | 中止 | 不中断服务 |
+| 改配置后 | — | — | 先 `nginx -t` 再 `nginx -s reload` |
+
 ### 2.2 Tomcat
 > 待补充
 
@@ -512,4 +543,4 @@ netstat -anlp | grep nginx
 
 ---
 
-**进度说明：** 第一章 ✅；2.1 Nginx（介绍 + 作用 + 安装 + 基础运维）✅；2.2–2.4 及第三、四章待截图补充。
+**进度说明：** 第一章 ✅；2.1 Nginx（介绍 + 作用 + 安装 + 运维）✅；2.2–2.4 及第三、四章待截图补充。
