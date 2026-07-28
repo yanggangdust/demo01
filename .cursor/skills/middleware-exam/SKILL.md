@@ -379,6 +379,49 @@ chown -R nginx:nginx /usr/local/nginx
 - 运行用户：`useradd -s /sbin/nologin nginx -M`
 - 安装后改属主：`chown -R nginx:nginx /usr/local/nginx`
 
+#### Nginx 在线安装（yum）
+
+**1. 安装前准备**
+
+```bash
+yum install epel-release -y
+yum install gcc pcre-devel openssl-devel zlib-devel -y
+useradd -s /sbin/nologin nginx -M
+```
+
+**2. 在线安装 Nginx 包**
+
+```bash
+yum install nginx
+```
+
+**3. 简单配置（测试页）**
+
+```bash
+echo "web1" > /usr/share/nginx/html/index.htm
+```
+
+**4. 启动服务**
+
+```bash
+systemctl start nginx
+systemctl status nginx
+```
+
+**5. 访问验证**
+
+- 浏览器访问：`http://192.168.205.164/index.htm`
+- 页面显示 **web1** 即成功
+
+**编译 vs 在线安装（对比）**
+
+| | 编译安装 | 在线安装 |
+|---|----------|----------|
+| 方式 | 源码 wget + configure + make | `yum install nginx`（需 EPEL） |
+| 路径 | `/usr/local/nginx` | 包默认路径（如 `/usr/share/nginx/html`） |
+| 模块 | 自定义 configure 参数 | 发行版预编译模块 |
+| 共同准备 | gcc/pcre/openssl/zlib 依赖 + nginx 用户 | 同上 + **epel-release** |
+
 ### 2.2 Tomcat
 > 待补充
 
@@ -419,4 +462,4 @@ chown -R nginx:nginx /usr/local/nginx
 
 ---
 
-**进度说明：** 第一章 ✅；2.1 Nginx（介绍 + 作用 + 编译安装）✅；2.2–2.4 及第三、四章待截图补充。
+**进度说明：** 第一章 ✅；2.1 Nginx（介绍 + 作用 + 编译/在线安装）✅；2.2–2.4 及第三、四章待截图补充。
