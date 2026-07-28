@@ -1501,6 +1501,47 @@ PID: 21686
 | 复杂度 | **更简单** | 功能更丰富 |
 | 场景 | 纯缓存加速 | 缓存 + 排行榜/计数器/队列等 |
 
+#### Memcached 安装（yum）
+
+**安装前依赖**
+
+> Linux 安装 Memcached，须**先安装 libevent 库**。
+
+```bash
+yum install libevent libevent-devel
+yum install memcached
+```
+
+**启停与验证（node164 示例）**
+
+```bash
+systemctl status memcached    # 初始可能 inactive (dead)
+systemctl start memcached
+systemctl status memcached    # active (running)
+which memcached               # /usr/bin/memcached
+```
+
+**默认运行参数（课件 status 输出）**
+
+```
+/usr/bin/memcached -u memcached -p 11211 -m 64 -c 1024
+```
+
+| 参数 | 含义 |
+|------|------|
+| `-u memcached` | 运行用户 **memcached** |
+| `-p 11211` | 默认端口 **11211** |
+| `-m 64` | 内存上限 **64MB** |
+| `-c 1024` | 最大并发连接 **1024** |
+
+**易考点**
+
+| 对比 | Redis | Memcached |
+|------|-------|-----------|
+| 安装 | 源码 make | **yum**（需 libevent） |
+| 默认端口 | **6379** | **11211** |
+| 管理 | redis-server / redis-cli | **systemctl** memcached |
+
 ## 四、分布式中间件架构与运维
 
 > 涵盖：Zookeeper、Kafka。
@@ -1522,4 +1563,4 @@ PID: 21686
 
 ---
 
-**进度说明：** 第一、二章 ✅；第三章 3.1 Redis ✅、3.2 Memcached 介绍 ✅；第四章待截图补充。
+**进度说明：** 第一、二章 ✅；第三章 3.1 Redis ✅、3.2 Memcached（介绍 + 安装）✅；第四章待截图补充。
