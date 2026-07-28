@@ -540,6 +540,42 @@ Child Processes（子进程）
 | CM / CL | 缓存管理与加载（可选子进程） |
 | 共享内存 | 缓存、会话持久化、限流、会话日志 |
 
+#### Nginx 练习实操
+
+**题目**
+
+> 在 CentOS 7 环境**在线安装** Nginx，访问首页内容为 **Hello Nginx**。
+
+**完整步骤（参考答案）**
+
+```bash
+# 1. 安装前准备
+yum install epel-release -y
+yum install gcc pcre-devel openssl-devel zlib-devel -y
+useradd -s /sbin/nologin nginx -M
+
+# 2. 在线安装
+yum install nginx
+
+# 3. 启动服务
+systemctl start nginx
+systemctl status nginx    # 确认 active (running)
+
+# 4. 配置首页并访问
+echo "Hello Nginx" > /usr/share/nginx/html/index.htm
+# 浏览器访问：http://192.168.205.164/index.htm
+# 页面显示 Hello Nginx 即完成
+```
+
+**考点串联**
+
+| 步骤 | 对应知识点 |
+|------|------------|
+| epel + 依赖 + 用户 | 在线安装前准备 |
+| yum install nginx | 在线安装 vs 编译安装 |
+| systemctl start | 基础运维 / systemd |
+| echo > index.htm | 静态页默认目录 `/usr/share/nginx/html/` |
+
 ### 2.2 Tomcat
 > 待补充
 
@@ -580,4 +616,4 @@ Child Processes（子进程）
 
 ---
 
-**进度说明：** 第一章 ✅；2.1 Nginx（介绍 + 作用 + 安装 + 运维 + 基础架构）✅；2.2–2.4 及第三、四章待截图补充。
+**进度说明：** 第一章 ✅；2.1 Nginx 完整（含练习实操）✅；2.2–2.4 及第三、四章待截图补充。
