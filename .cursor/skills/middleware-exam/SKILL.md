@@ -1074,6 +1074,45 @@ MySQL（120）  ←—— repl ——→  MySQL（121）
 - **Master** 干活（转发+ARP）；**Backup** 待命竞选
 - Keepalived 实现 VRRP → 健康检查 + VIP 在主备间切换
 
+#### VRRP 机制（状态转换）
+
+**VRRP 路由器三种状态**
+
+1. **Initialize**（初始化）
+2. **Master**
+3. **Backup**
+
+> 不同状态之间**可相互转换**。
+
+**状态转换图（课件）**
+
+```
+                    Initialize
+                   /          \
+    startup且优先级=255    startup且优先级<255
+                 /              \
+            Master ←——————————→ Backup
+                   \          /
+        更高优先级VRRP报文    超时未收到Master hello
+        或 shutdown          或 shutdown
+```
+
+| 当前状态 | 触发条件 | 下一状态 |
+|----------|----------|----------|
+| **Initialize** | 收到 startup，且**优先级 = 255** | **Master** |
+| **Initialize** | 收到 startup，且**优先级 < 255** | **Backup** |
+| **Master** | 收到 **shutdown** 消息 | **Initialize** |
+| **Master** | 收到**更高优先级** VRRP 报文 | **Backup** |
+| **Backup** | 收到 **shutdown** 消息 | **Initialize** |
+| **Backup** | 规定超时内**未收到 Master 的 hello 报文** | **Master** |
+
+**易考点**
+
+- 优先级 **255** → 启动直接 **Master**；**< 255** → **Backup**
+- Backup 升 Master：**Master hello 超时**（Master 宕机/网络故障）
+- Master 降 Backup：收到**更高优先级** VRRP 报文
+- shutdown → 回到 **Initialize**
+
 ## 三、缓存中间件架构与运维
 
 > 涵盖：Redis、Memcached。
@@ -1105,4 +1144,4 @@ MySQL（120）  ←—— repl ——→  MySQL（121）
 
 ---
 
-**进度说明：** 第一章 ✅；第二章 Web 中间件（2.1–2.4，Keepalived 介绍 + MySQL HA 实验）✅；第三、四章待截图补充。
+**进度说明：** 第一章 ✅；第二章 Web 中间件（2.1–2.4，Keepalived 含 VRRP 概念+机制）✅；第三、四章待截图补充。
