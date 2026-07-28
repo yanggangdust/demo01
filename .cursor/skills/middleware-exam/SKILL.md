@@ -609,6 +609,44 @@ echo "Hello Nginx" > /usr/share/nginx/html/index.htm
 | 静态/动态 | 擅长静态 + 反向代理 | 擅长 **JSP/Servlet 动态页面** |
 | 关系 | 常作 Tomcat 前端的统一入口与负载均衡 | 后端应用容器 |
 
+#### Tomcat 的架构基础
+
+**核心组件**
+
+- **连接器（Connector）**
+- **容器（Container）**
+
+**架构层次（课件）**
+
+```
+Tomcat
+  └── Service（可多个）
+        ├── Connector（连接器，可多个）
+        └── Container（容器）
+              请求 → Connector → ServletRequest → Container
+              响应 ← Connector ← ServletResponse ← Container
+```
+
+**两大核心功能**
+
+| 组件 | 方向 | 功能 |
+|------|------|------|
+| **Connector** | **对外** | 处理 **Socket 连接**；负责**网络字节流**与 **Request/Response 对象**的转化 |
+| **Container** | **对内** | **加载并管理 Servlet**；处理具体的 **Request 请求** |
+
+**请求处理流程**
+
+1. 客户端 **请求** → **Connector** 接收
+2. Connector 将字节流转为 **ServletRequest**，交给 **Container**
+3. Container 调用 Servlet 处理，生成 **ServletResponse**
+4. Connector 将 Response 转为字节流，返回 **响应** 给客户端
+
+**易考点**
+
+- Connector = **网络 I/O + 协议转换**（对外）
+- Container = **Servlet 生命周期 + 业务请求处理**（对内）
+- 一个 Service 内：**多个 Connector** 可共用一个 **Container**
+
 #### Tomcat — 处理动态请求（Nginx + Tomcat 分工）
 
 **核心思路**
@@ -889,4 +927,4 @@ Tomcat = Servlet/JSP 容器 + 运行动态 Java 应用
 
 ---
 
-**进度说明：** 第一章 ✅；2.1 Nginx ✅；2.2 Tomcat 完整 ✅；2.3–2.4 及第三、四章待截图补充。
+**进度说明：** 第一章 ✅；2.1 Nginx ✅；2.2 Tomcat（含架构基础）✅；2.3–2.4 及第三、四章待截图补充。
