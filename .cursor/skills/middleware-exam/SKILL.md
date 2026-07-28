@@ -1179,6 +1179,24 @@ systemctl status keepalived
 
 > 与 Nginx、HAProxy 现网模式一致：`/apps/svr/` 部署 + `/apps/sh/` 脚本 + `/apps/logs/` 日志。
 
+#### Keepalived 配置项 1
+
+| 配置项 | 说明 |
+|--------|------|
+| **notification_email** | Keepalived **切换/故障**时发送通知的邮箱；后接 **smtp_server**（邮件服务器地址）；邮件非实时，生产可用其他告警方式 |
+| **router_id** | 标识本机，通常设为 **hostname**；故障邮件中用于识别是哪台机器 |
+| **state** | 实例**初始状态**（Initial）；即使配 **MASTER**，实际仍按**优先级选举**；本机优先级低则他机成为 Master |
+| **nopreempt** | **非抢占模式**；仅当**两节点都配 BACKUP** 时生效；否则 MASTER 节点会**抢占 VIP**；建议开启，**避免频繁切换/抖动** |
+
+**易考点**
+
+| 配置项 | 易错点 |
+|--------|--------|
+| `state MASTER` | 不等于一定当 Master，还看 **priority** 选举 |
+| `nopreempt` | 防 VIP 来回抢；需两节点均为 BACKUP 才生效 |
+| `router_id` | 一般 = **hostname**，便于告警定位 |
+| `notification_email` | 配合 **smtp_server** 发切换通知 |
+
 ## 三、缓存中间件架构与运维
 
 > 涵盖：Redis、Memcached。
@@ -1210,4 +1228,4 @@ systemctl status keepalived
 
 ---
 
-**进度说明：** 第一章 ✅；第二章 Web 中间件（2.1–2.4 完整，含 Keepalived 安装）✅；第三、四章待截图补充。
+**进度说明：** 第一章 ✅；第二章 Web 中间件（2.1–2.4，Keepalived 含配置项1）✅；第三、四章待截图补充。
