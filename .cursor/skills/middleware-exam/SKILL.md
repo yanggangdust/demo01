@@ -250,15 +250,18 @@ VIP（虚拟 IP）   ← 两 HAProxy + Keepalived 提供应用入口
 
 ## 二、Web 中间件架构与运维
 
-> 涵盖：Nginx、HAProxy、Tomcat 等。
+> 本章目录：**Nginx** ★、Tomcat、**HAProxy** ★、**Keepalived** ★（★ = 课件标注重点）
 
-### 2.1 Nginx
+### 2.1 Nginx ★
 > 待补充
 
-### 2.2 HAProxy
+### 2.2 Tomcat
 > 待补充
 
-### 2.3 Tomcat
+### 2.3 HAProxy ★
+> 待补充
+
+### 2.4 Keepalived ★
 > 待补充
 
 ## 三、缓存中间件架构与运维
