@@ -503,6 +503,43 @@ nginx -t             # syntax is ok / test is successful
 | 进行中请求 | 处理完毕再停 | 中止 | 不中断服务 |
 | 改配置后 | — | — | 先 `nginx -t` 再 `nginx -s reload` |
 
+#### Nginx 基础架构
+
+**进程模型：master/worker 多进程**
+
+```
+MASTER PROCESS（主进程）
+  ↓ 管理/生成
+Child Processes（子进程）
+  ├── CM — Cache Manager（缓存管理）
+  ├── CL — Cache Loader（缓存加载）
+  └── W  — Worker × N（工作进程，处理 HTTP 等网络流量）
+```
+
+**共享内存（Shared Memory）**
+
+用于：**cache**、**session persistence**、**rate limits**、**session log**
+
+**主进程（Master Process）**
+
+- 主要功能：**与外界通信** + **管理内部其他进程**
+
+**工作进程（Worker Process）**
+
+- 由**主进程生成**
+- 数量可在 **Nginx 配置文件**中指定（如 `worker_processes`）
+- 正常情况下，**伴随主进程整个生命周期**存在
+- **Worker 负责处理 HTTP 及其他网络流量**
+
+**易考点**
+
+| 进程 | 职责 |
+|------|------|
+| Master | 监听端口、管理 worker、读配置、不处理业务请求 |
+| Worker | 实际处理客户端连接与请求 |
+| CM / CL | 缓存管理与加载（可选子进程） |
+| 共享内存 | 缓存、会话持久化、限流、会话日志 |
+
 ### 2.2 Tomcat
 > 待补充
 
@@ -543,4 +580,4 @@ nginx -t             # syntax is ok / test is successful
 
 ---
 
-**进度说明：** 第一章 ✅；2.1 Nginx（介绍 + 作用 + 安装 + 运维）✅；2.2–2.4 及第三、四章待截图补充。
+**进度说明：** 第一章 ✅；2.1 Nginx（介绍 + 作用 + 安装 + 运维 + 基础架构）✅；2.2–2.4 及第三、四章待截图补充。
