@@ -703,6 +703,61 @@ ps -ef | grep tomcat
 - 与 Nginx 不同：Tomcat 是 **Java 应用服务器**，需 JDK 环境（课件本页未强调，实操时注意）
 - 验证：8080 端口 + 默认欢迎页
 
+#### Tomcat 升级 — Linux 系统（8.0.26 → 8.5.39）
+
+**背景**
+
+- 日常运维中常因**安全漏洞**需升级 Tomcat 修复
+- 课件示例：**8.0.26 升级到 8.5.39**
+
+**1. 下载并解压新版本**
+
+```bash
+wget https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.39/bin/apache-tomcat-8.5.39.tar.gz
+tar -xf apache-tomcat-8.5.39.tar.gz
+```
+
+**2. 配置新 Tomcat（迁移旧版配置与应用）**
+
+```bash
+cp -rf apache-tomcat-8.0.26/conf/* apache-tomcat-8.5.39/conf/
+cp -rf apache-tomcat-8.0.26/bin/* apache-tomcat-8.5.39/bin/
+rm -rf apache-tomcat-8.5.39/webapps/*
+cp -rf apache-tomcat-8.0.26/webapps/* apache-tomcat-8.5.39/webapps/
+```
+
+> 课件原图 `8.0.26 /bin/*` 应为 `8.0.26/bin/*`（路径空格为笔误）。
+
+**3. 停止旧 Tomcat**
+
+```bash
+./apache-tomcat-8.0.26/bin/shutdown.sh
+```
+
+**4. 启动新 Tomcat**
+
+```bash
+./apache-tomcat-8.5.39/bin/startup.sh
+```
+
+**升级流程速记**
+
+```
+下载解压新版 → 拷贝 conf/bin/webapps → 停旧启新
+```
+
+| 迁移项 | 说明 |
+|--------|------|
+| `conf/*` | 保留原有配置（端口、用户等） |
+| `bin/*` | 保留/custom 启动脚本等 |
+| `webapps/*` | 先清空新版 webapps，再拷贝旧应用 |
+
+**易考点**
+
+- 升级核心：**配置与应用迁移** + **shutdown 旧版** + **startup 新版**
+- 与安装页 `cp conf` 命令呼应：安装示例中的 cp 实为**升级场景**配置迁移
+- 升级前建议备份；升级后验证 8080 与业务应用
+
 ### 2.3 HAProxy ★
 > 待补充
 
@@ -740,4 +795,4 @@ ps -ef | grep tomcat
 
 ---
 
-**进度说明：** 第一章 ✅；2.1 Nginx ✅；2.2 Tomcat（简介 + 动静态分离 + Linux 安装）✅；2.3–2.4 及第三、四章待截图补充。
+**进度说明：** 第一章 ✅；2.1 Nginx ✅；2.2 Tomcat（简介 + 动静态分离 + 安装 + 升级）✅；2.3–2.4 及第三、四章待截图补充。
