@@ -1218,6 +1218,78 @@ systemctl status keepalived
 | `virtual_ipaddress` | Master 挂 VIP，Backup 卸 VIP；可多 VIP |
 | `authentication` | 主备配置**完全一致** |
 
+#### Keepalived 配置实例（MySQL 高可用）
+
+**global_defs + 健康检查脚本**
+
+```keepalived
+global_defs {
+    notification_email {
+        13802883042@139.com
+    }
+    smtp_server 127.0.0.1
+    smtp_connect_timeout 30
+    router_id NodeA
+}
+
+vrrp_script chk_bcmysql {
+    script "/apps/sh/bcrdb_check.sh"
+    interval 10
+}
+```
+
+**vrrp_instance VI_1**
+
+```keepalived
+vrrp_instance VI_1 {
+    state BACKUP
+    interface ens34
+    virtual_router_id 193
+    priority 100
+    advert_int 1
+    smtp alert
+    nopreempt
+    track_interface {
+        ens34
+    }
+    track_script {
+        chk_bcmysql
+    }
+    authentication {
+        auth_type PASS
+        auth_pass pNz_2@sM
+    }
+    virtual_ipaddress {
+        192.168.205.193 dev ens34 label ens34:1
+    }
+    notify_master "/apps/sh/notify_bcrdb_master.sh"
+}
+```
+
+**课件要点（右侧说明）**
+
+| 配置块 | 作用 |
+|--------|------|
+| **chk_bcmysql** | 脚本检测**数据库主从状态**（`/apps/sh/bcrdb_check.sh`，每 10s） |
+| **virtual_ipaddress** | 定义集群 **VIP**：`192.168.205.193`（与 1.2/2.4 实验 IP 一致） |
+| **notify_master** | 升为 Master 时执行切换脚本（`/apps/sh/notify_bcrdb_master.sh`） |
+
+**实例配置解读**
+
+| 项 | 本例取值 | 说明 |
+|----|----------|------|
+| `state BACKUP` + `nopreempt` | 非抢占 | 避免 VIP 频繁切换 |
+| `virtual_router_id` | **193** | 与 VIP 末段呼应（192.168.205.**193**） |
+| `track_interface` | ens34 | 网卡故障则切换 |
+| `track_script` | chk_bcmysql | MySQL 异常则降优先级/切换 |
+| VIP 绑定 | `dev ens34 label ens34:1` | VIP 挂在 ens34 子接口 |
+
+**易考点**
+
+- Keepalived + **自定义脚本** = 不仅 VRRP，还做 **MySQL 健康检查**
+- `track_script` 关联 `vrrp_script` 名称（chk_bcmysql）
+- 切换后 **notify_master** 执行善后（如通知、改从库角色等）
+
 ## 三、缓存中间件架构与运维
 
 > 涵盖：Redis、Memcached。
@@ -1249,4 +1321,4 @@ systemctl status keepalived
 
 ---
 
-**进度说明：** 第一章 ✅；第二章 Web 中间件（2.1–2.4，Keepalived 配置项1/2）✅；第三、四章待截图补充。
+**进度说明：** 第一章 ✅；第二章 Web 中间件（2.1–2.4 完整，含 Keepalived 配置实例）✅；第三、四章待截图补充。
