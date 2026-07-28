@@ -1467,7 +1467,7 @@ PID: 21686
 |------|---------------|
 | `daemonize` | no → 生产改 **yes** |
 | `port` | **6379** |
-| `databases` | 默认 **16** 个库（课件强调默认用 **0**） |
+| `databases` | 默认使用 **db 0**；`SELECT <dbid>` 切换 |
 | `loglevel` | 生产常用 **notice** |
 | 多实例 | 不同 **pidfile + port + bind** |
 
