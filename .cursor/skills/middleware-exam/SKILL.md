@@ -1893,6 +1893,69 @@ Partition 2:  [0][1][2]...[12]
 | `num.replica.fetchers↑` | 副本同步加速，I/O 代价 |
 | `zookeeper.session.timeout.ms=120000` | 防 ZK 误断连 |
 
+#### Kafka Topic 操作
+
+**工具**
+
+- **kafka-topics.sh** — Topic 增删改查
+- **kafka-configs.sh** — Topic 级别配置修改
+- 须指定 ZK 连接串：`--zookeeper hdp1:2181/kafka`
+
+**创建（Create）**
+
+```bash
+kafka-topics.sh --zookeeper hdp1:2181/kafka --create \
+  --replication-factor 2 --partitions 6 --topic test
+
+# 创建时指定 retention
+kafka-topics.sh --zookeeper hdp1:2181/kafka --create \
+  --replication-factor 2 --partitions 6 --topic test \
+  --config retention.ms=300000
+```
+
+**删除（Delete）**
+
+> 前提：Broker 配置 **`delete.topic.enable=true`**
+
+```bash
+kafka-topics.sh --zookeeper hdp1:2181/kafka --delete --topic test
+```
+
+**修改（Modify）**
+
+```bash
+# 修改分区数（只能增加）
+kafka-topics.sh --zookeeper hdp1:2181/kafka --alter \
+  --topic test --partitions 10
+
+# 添加/更新 Topic 配置
+kafka-configs.sh --zookeeper hdp1:2181/kafka \
+  --entity-type topics --entity-name test --alter \
+  --add-config retention.ms=6000000
+
+# 删除 Topic 配置项
+kafka-configs.sh --zookeeper hdp1:2181/kafka \
+  --entity-type topics --entity-name test --alter \
+  --delete-config retention.ms
+```
+
+**查看（View）**
+
+```bash
+bin/kafka-topics.sh --zookeeper hdp1:2181/kafka --list
+bin/kafka-topics.sh --zookeeper hdp1:2181/kafka --describe --topic test
+```
+
+**易考点**
+
+| 操作 | 关键参数/注意 |
+|------|---------------|
+| 创建 | `--replication-factor` `--partitions` `--topic` |
+| 删除 | 需 **delete.topic.enable=true** |
+| 改分区 | `--alter --partitions`（通常**只增不减**） |
+| 改配置 | **kafka-configs.sh** + `--add-config` / `--delete-config` |
+| 查看 | `--list` / `--describe` |
+
 ## 复习互动方式
 
 1. **默写**：某一整块（如消息队列模型 / 缓存读写策略）
@@ -1904,4 +1967,4 @@ Partition 2:  [0][1][2]...[12]
 
 ---
 
-**进度说明：** 第一～三章 ✅；4.1 Kafka ✅；4.2（安装启动 + 配置参数）✅；后续 Kafka 操作待截图补充。
+**进度说明：** 第一～三章 ✅；4.1 Kafka ✅；4.2（安装 + 配置 + Topic 操作）✅；生产/消费等待截图。
