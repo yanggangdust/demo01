@@ -657,6 +657,52 @@ location / {
 - Tomcat 默认端口 **8080**
 - 与 **2.1 Nginx 作用**（Tomcat 集群 + Redis Session）可组合记忆
 
+#### Tomcat 安装 — Linux 系统（8.0.26）
+
+**1. 下载 Tomcat 8**
+
+- 归档地址：`https://archive.apache.org/dist/tomcat/tomcat-8/`
+
+```bash
+wget https://archive.apache.org/dist/tomcat/tomcat-8/v8.0.26/bin/apache-tomcat-8.0.26.tar.gz
+```
+
+**2. 解压缩并启动**
+
+```bash
+tar -zxvf apache-tomcat-8.0.26.tar.gz -C /usr/local/
+cp -rf apache-tomcat-8.0.26/conf/* apache-tomcat-8.5.39/conf/   # 课件原样（版本路径以实际为准）
+cd /usr/local/apache-tomcat-8.0.26
+./bin/startup.sh
+```
+
+**3. 查看 Tomcat 进程**
+
+```bash
+ps -ef | grep tomcat
+```
+
+**4. 访问 Tomcat 主页**
+
+- 浏览器：`http://192.168.205.164:8080/`
+- 成功标志：页面显示 **Apache Tomcat/8.0.26**，提示安装成功
+
+**常用路径与命令**
+
+| 项 | 说明 |
+|----|------|
+| 安装目录 | `/usr/local/apache-tomcat-8.0.26` |
+| 启动脚本 | `./bin/startup.sh` |
+| 停止脚本 | `./bin/shutdown.sh`（课件未列，运维常用） |
+| 默认端口 | **8080** |
+| 进程检查 | `ps -ef \| grep tomcat` |
+
+**易考点**
+
+- Tomcat **免编译**：下载 tar.gz → 解压 → `startup.sh` 即可
+- 与 Nginx 不同：Tomcat 是 **Java 应用服务器**，需 JDK 环境（课件本页未强调，实操时注意）
+- 验证：8080 端口 + 默认欢迎页
+
 ### 2.3 HAProxy ★
 > 待补充
 
@@ -694,4 +740,4 @@ location / {
 
 ---
 
-**进度说明：** 第一章 ✅；2.1 Nginx ✅；2.2 Tomcat（简介 + 动静态分离）✅；2.3–2.4 及第三、四章待截图补充。
+**进度说明：** 第一章 ✅；2.1 Nginx ✅；2.2 Tomcat（简介 + 动静态分离 + Linux 安装）✅；2.3–2.4 及第三、四章待截图补充。
