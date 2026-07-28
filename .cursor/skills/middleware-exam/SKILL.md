@@ -824,6 +824,34 @@ curl -u admin:admin密码 "http://localhost:18080/manager/text/deploy?path=/op-o
 - `path=` 为应用**上下文路径**（如 `/op-order-manage`）
 - reload ≠ redeploy：reload 热重载；undeploy/deploy 为卸载/部署
 
+#### Nginx 和 Tomcat 的区别
+
+**1. 核心职能**
+
+| | Nginx | Tomcat |
+|---|-------|--------|
+| 定位 | **静态内容服务** + **代理服务器** | **应用容器** |
+| 行为 | 接收外部请求，**转发**给 Tomcat、Django 等后端 | 在容器内**运行 Java Web 应用** |
+
+**2. 技术分类**
+
+| 类型 | 代表 | 职责 |
+|------|------|------|
+| **HTTP Server** | Apache、Nginx | 严格意义上的 HTTP 服务器；向客户端提供服务器上存储的资源（HTML、图片等），经 HTTP **原样传输** |
+| **Application Server** | Tomcat | **应用服务器**；**Servlet/JSP** 应用容器 |
+
+**3. 注意（课件强调）**
+
+> **Nginx 只做请求分发（代理/负载均衡），不做应用逻辑的实际处理。**
+
+**对比速记（考试用）**
+
+```
+Nginx  = 静态 + 反向代理 + 分发请求
+Tomcat = Servlet/JSP 容器 + 运行动态 Java 应用
+组合   = Nginx 前置入口，Tomcat 后端处理动态逻辑（见 2.2 静动分离）
+```
+
 ### 2.3 HAProxy ★
 > 待补充
 
@@ -861,4 +889,4 @@ curl -u admin:admin密码 "http://localhost:18080/manager/text/deploy?path=/op-o
 
 ---
 
-**进度说明：** 第一章 ✅；2.1 Nginx ✅；2.2 Tomcat（简介 + 动静态分离 + 安装 + 升级 + 现网运维）✅；2.3–2.4 及第三、四章待截图补充。
+**进度说明：** 第一章 ✅；2.1 Nginx ✅；2.2 Tomcat 完整 ✅；2.3–2.4 及第三、四章待截图补充。
