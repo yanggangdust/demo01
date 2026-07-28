@@ -1145,6 +1145,40 @@ MySQL（120）  ←—— repl ——→  MySQL（121）
 | 转发/接收 VIP 流量 | ✅ | ❌（待命） |
 | 监控 Master | — | ✅ 收通告判断 Master 健康 |
 
+#### Keepalived 安装
+
+**yum 在线安装**
+
+```bash
+# 1. 安装 EPEL 源
+yum install epel-release -y
+
+# 2. 在线安装
+yum install keepalived
+
+# 3. 启动和查看服务
+systemctl start keepalived
+systemctl status keepalived
+```
+
+**现网标准安装（课件）**
+
+| 项 | 路径/命令 |
+|----|-----------|
+| 安装部署路径 | `/apps/svr/keepalived` |
+| 启停管理 | `sudo /apps/sh/keepalived.sh start\|stop\|restart\|status` |
+| 日志目录 | `/apps/logs/keepalived` |
+
+**易考点**
+
+| 对比 | yum 安装 | 现网标准 |
+|------|----------|----------|
+| 管理 | `systemctl start/status keepalived` | `/apps/sh/keepalived.sh` |
+| 路径 | 系统默认 | `/apps/svr/keepalived` |
+| 依赖 | 需 **epel-release** | 同左 + 日志/脚本标准化 |
+
+> 与 Nginx、HAProxy 现网模式一致：`/apps/svr/` 部署 + `/apps/sh/` 脚本 + `/apps/logs/` 日志。
+
 ## 三、缓存中间件架构与运维
 
 > 涵盖：Redis、Memcached。
@@ -1176,4 +1210,4 @@ MySQL（120）  ←—— repl ——→  MySQL（121）
 
 ---
 
-**进度说明：** 第一章 ✅；第二章 Web 中间件（2.1–2.4，Keepalived/VRRP 完整）✅；第三、四章待截图补充。
+**进度说明：** 第一章 ✅；第二章 Web 中间件（2.1–2.4 完整，含 Keepalived 安装）✅；第三、四章待截图补充。
