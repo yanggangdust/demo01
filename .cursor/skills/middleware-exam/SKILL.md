@@ -1792,6 +1792,49 @@ Broker(Controller) ──管理──→ Broker × N
 - **ISR**（In-Sync Replicas）：同步副本集合，Controller 负责更新
 - Controller 故障 → 其他 Broker **竞选**新 Controller（类比 VRRP Master 选举）
 
+#### Topic & Partition（Kafka 基本概念）
+
+**Partition 三条要点**
+
+1. **增加 Partition 数量** → 提升**读写并发**
+2. 一个 Partition 有**多个副本**，但**只有一个副本是 Leader**
+3. Partition 的**读写只能通过 Leader**
+
+**写入路径（Write path）**
+
+```
+Producer → Broker（Elected Leader）→ 复制 → Follower × N
+                ↓                          ↓
+          Local Storage              Local Storage
+```
+
+- Producer **只写 Leader**
+- Leader **复制数据**到 Follower
+- 各 Broker 本地存储（Local Storage）
+
+**Topic 内部结构（Anatomy of a Topic）**
+
+```
+Partition 0:  [0][1][2]...[12]  ← Writes 追加到末尾
+Partition 1:  [0][1]...[9]      ← Old ————→ New
+Partition 2:  [0][1][2]...[12]
+```
+
+| 概念 | 说明 |
+|------|------|
+| **Offset** | 分区内消息编号（0, 1, 2…） |
+| **追加写** | 新消息始终**追加到 Partition 末尾** |
+| **顺序** | 分区内 **Old → New** 有序；跨 Partition 无全局顺序 |
+
+**易考点**
+
+| 问题 | 答案 |
+|------|------|
+| 如何提高并发？ | **增加 Partition 数** |
+| 客户端读写找谁？ | 仅 **Leader** |
+| 副本角色？ | 1 Leader + 多 Follower |
+| 消息顺序保证？ | **Partition 内有序**，非 Topic 全局 |
+
 ### 4.2 Kafka 基础操作 ★
 > 待补充
 
@@ -1806,4 +1849,4 @@ Broker(Controller) ──管理──→ Broker × N
 
 ---
 
-**进度说明：** 第一、二、三章 ✅；4.1 Kafka（含 Controller）✅；4.2 待截图补充。
+**进度说明：** 第一、二、三章 ✅；4.1 Kafka（含 Topic/Partition）✅；4.2 待截图补充。
