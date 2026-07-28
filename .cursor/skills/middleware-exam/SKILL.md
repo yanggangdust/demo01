@@ -758,6 +758,72 @@ cp -rf apache-tomcat-8.0.26/webapps/* apache-tomcat-8.5.39/webapps/
 - 与安装页 `cp conf` 命令呼应：安装示例中的 cp 实为**升级场景**配置迁移
 - 升级前建议备份；升级后验证 8080 与业务应用
 
+#### 现网 Tomcat 运维操作（18080 + Manager Text）
+
+> 生产环境示例：端口 **18080**；管理脚本标准化；通过 **Tomcat Manager Text** 接口管理应用。
+
+**1. 启动、关闭、重启、查看进程**
+
+```bash
+/apps/sh/tomcat_18080.sh start|stop|status|restart
+```
+
+**2. 查看 Tomcat 下工程运行情况**
+
+```bash
+curl -u admin:admin密码 http://localhost:18080/manager/text/list
+```
+
+**3. 指定停止某工程包**
+
+```bash
+curl -u admin:admin密码 http://localhost:18080/manager/text/stop?path=/op-order-manage
+```
+
+**4. 指定重载（reload）某工程包**
+
+```bash
+curl -u admin:admin密码 http://localhost:18080/manager/text/reload?path=/op-order-manage
+```
+
+**5. 指定启动某工程包**
+
+```bash
+curl -u admin:admin密码 http://localhost:18080/manager/text/start?path=/op-order-manage
+```
+
+**6. 指定解部署（undeploy）某工程包**
+
+```bash
+curl -u admin:admin密码 http://localhost:18080/manager/text/undeploy?path=/op-order-manage
+```
+
+**7. 从目录部署 WAR 并指定工程名**
+
+```bash
+curl -u admin:admin密码 "http://localhost:18080/manager/text/deploy?path=/op-order-manage&war=file:/tmp/bcon20180807/op-order-manage-v2.war"
+```
+
+> 课件第 7 条 URL 末尾被截断；`war=file:` 路径以课件底部 `op-order-manage-v2.war` 为准。
+
+**Manager Text 接口速记**
+
+| 操作 | URL 路径 |
+|------|----------|
+| list | `/manager/text/list` |
+| stop | `/manager/text/stop?path=/上下文` |
+| reload | `/manager/text/reload?path=/上下文` |
+| start | `/manager/text/start?path=/上下文` |
+| undeploy | `/manager/text/undeploy?path=/上下文` |
+| deploy | `/manager/text/deploy?path=/上下文&war=file:/路径/xxx.war` |
+
+**易考点**
+
+- 现网用**自定义脚本**（`/apps/sh/tomcat_18080.sh`）而非直接 startup.sh
+- 应用管理走 **curl + Manager Text**，需 `-u admin:密码` 认证
+- `path=` 为应用**上下文路径**（如 `/op-order-manage`）
+- reload ≠ redeploy：reload 热重载；undeploy/deploy 为卸载/部署
+
 ### 2.3 HAProxy ★
 > 待补充
 
@@ -795,4 +861,4 @@ cp -rf apache-tomcat-8.0.26/webapps/* apache-tomcat-8.5.39/webapps/
 
 ---
 
-**进度说明：** 第一章 ✅；2.1 Nginx ✅；2.2 Tomcat（简介 + 动静态分离 + 安装 + 升级）✅；2.3–2.4 及第三、四章待截图补充。
+**进度说明：** 第一章 ✅；2.1 Nginx ✅；2.2 Tomcat（简介 + 动静态分离 + 安装 + 升级 + 现网运维）✅；2.3–2.4 及第三、四章待截图补充。
