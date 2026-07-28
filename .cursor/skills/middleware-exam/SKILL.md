@@ -1414,6 +1414,40 @@ make install
 - 编译前必须有 **gcc**
 - 课件版本：**3.0.7**
 
+#### 启停 Redis
+
+**启动方式（三种）**
+
+| 方式 | 命令 |
+|------|------|
+| **默认启动** | `redis-server` |
+| **命令行指定配置** | `redis-server --configKey1 configValue1 --configKey2 configValue2` |
+| **配置文件启动** | `redis-server /opt/redis/redis.conf` |
+
+**停止服务**
+
+```bash
+redis-cli shutdown
+```
+
+**启动成功标志（课件示例）**
+
+```
+Redis 3.0.7 (00000000/0) 64 bit
+Running in standalone mode
+Port: 6379
+PID: 21686
+```
+
+**易考点**
+
+| 项 | 值/说明 |
+|----|---------|
+| 默认端口 | **6379** |
+| 运行模式 | **standalone**（单机） |
+| 停止命令 | `redis-cli shutdown`（优雅关闭） |
+| 生产推荐 | 使用 **redis.conf** 配置文件启动 |
+
 ### 3.2 Memcached
 > 待补充
 
@@ -1438,4 +1472,4 @@ make install
 
 ---
 
-**进度说明：** 第一、二章 ✅；3.1 Redis（介绍 + 特性 + 场景 + 单机安装）✅；3.2 及第四章待截图补充。
+**进度说明：** 第一、二章 ✅；3.1 Redis（介绍 + 特性 + 场景 + 安装 + 启停）✅；3.2 及第四章待截图补充。
