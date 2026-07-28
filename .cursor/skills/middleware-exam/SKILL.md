@@ -1724,6 +1724,35 @@ Producer × N  ──→  Topics  ──→  Kafka Cluster（Broker × N）
 | 扩展 | Producer/Broker/Consumer **全水平扩展** | 有限 |
 | 场景 | **流处理 + 批处理** | 轻量缓存/队列 |
 
+#### Kafka 基本概念
+
+| 组件 | 释义 |
+|------|------|
+| **Broker** | **消息处理节点**；一个 Kafka 节点 = 一个 Broker；集群含一个或多个 Broker，**支持水平扩展** |
+| **Topic** | **消息类别/主题**；Kafka 按 Topic 归类消息；发布到集群的**每条消息必须指定 Topic** |
+| **Partition** | 本质是**目录**；Topic 的**物理分组**；一个 Topic 可分多个 Partition；**Partition 内部有序** |
+| **Replication** | Partition 的**副本**，提供**数据备份** |
+| **Segment** | Partition 物理上由多个 **Segment** 组成 |
+| **Producer** | **生产者**；向 Broker **发送**消息的客户端 |
+| **Consumer** | **消费者**；从 Broker **读取**消息的客户端 |
+| **ConsumerGroup** | 每个 Consumer 属于特定 **Consumer Group**；一条消息可发到**多个不同 Group**；**同一 Group 内仅一个 Consumer 消费该消息** |
+
+**层次关系（易记）**
+
+```
+Topic（逻辑分类）
+  └── Partition（物理分组，内部有序）
+        ├── Replication（副本备份）
+        └── Segment（物理文件段）
+```
+
+**ConsumerGroup 规则（考试常考）**
+
+| 规则 | 说明 |
+|------|------|
+| 跨 Group | 同一条消息 → **多个 Group 各消费一次**（广播） |
+| 组内 | **同一 Group 内** → 每条消息**只被一个 Consumer** 消费（负载均衡） |
+
 ### 4.2 Kafka 基础操作 ★
 > 待补充
 
@@ -1738,4 +1767,4 @@ Producer × N  ──→  Topics  ──→  Kafka Cluster（Broker × N）
 
 ---
 
-**进度说明：** 第一、二、三章 ✅；4.1 Kafka（简介 + 项目应用 + 设计目标）✅；4.2 待截图补充。
+**进度说明：** 第一、二、三章 ✅；4.1 Kafka（简介 + 项目 + 设计目标 + 基本概念）✅；4.2 待截图补充。
