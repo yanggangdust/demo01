@@ -1542,6 +1542,51 @@ which memcached               # /usr/bin/memcached
 | 默认端口 | **6379** | **11211** |
 | 管理 | redis-server / redis-cli | **systemctl** memcached |
 
+#### Memcached 启动参数
+
+**查看帮助**
+
+```bash
+memcached -h
+```
+
+**常用启动参数**
+
+| 参数 | 含义 |
+|------|------|
+| **-d** | **守护进程**方式启动 |
+| **-m** | 分配内存大小（**MB**） |
+| **-u** | 运行 Memcached 的**用户** |
+| **-l** | 监听 **IP**（可多个） |
+| **-p** | 监听**端口**（建议 **> 1024**） |
+| **-c** | 最大并发连接数，默认 **1024** |
+| **-P** |（大写）**PID 文件**路径 |
+
+**启动示例（node164）**
+
+```bash
+memcached -u root -P /tmp/memcached.pid -p 50001 -m 64m -d
+cat /tmp/memcached.pid          # 3058
+ps -ef | grep memca             # 可见 11211 默认实例 + 50001 新实例
+```
+
+**示例解读**
+
+| 项 | 值 |
+|----|-----|
+| 自定义端口 | **50001**（非默认 11211） |
+| 内存 | **64MB** |
+| 用户 | root |
+| PID 文件 | `/tmp/memcached.pid` |
+| 模式 | **-d** 后台守护进程 |
+
+**易考点**
+
+- **-p** 小写 = port；**-P** 大写 = **PID 文件**（勿混淆）
+- 端口建议 **大于 1024**
+- 可同时运行**多个实例**（不同 port + PID 文件）
+- 默认实例（systemctl）：11211；手动实例：50001
+
 ## 四、分布式中间件架构与运维
 
 > 涵盖：Zookeeper、Kafka。
@@ -1563,4 +1608,4 @@ which memcached               # /usr/bin/memcached
 
 ---
 
-**进度说明：** 第一、二章 ✅；第三章 3.1 Redis ✅、3.2 Memcached（介绍 + 安装）✅；第四章待截图补充。
+**进度说明：** 第一、二章 ✅；第三章 3.1 Redis ✅、3.2 Memcached（介绍 + 安装 + 启动参数）✅；第四章待截图补充。
