@@ -221,14 +221,32 @@ VIP（虚拟 IP）   ← 两 HAProxy + Keepalived 提供应用入口
 
 ### 1.3 中间件种类
 
-> 广义分类见 **1.1 广义中间件分类**；后续课程二至四章按 Web / 缓存 / 分布式等展开。
+#### 常见中间件（课件四类）
 
-**四大类速记**
+> 与 **1.1 广义四类** 视角不同：此处将**分布式**与**消息**分开列举；Web 类补充 Keepalived、LVS。
 
-1. Web — Nginx、Tomcat、HAProxy
-2. 数据库和缓存 — Redis、Memcached
-3. 消息和分布式 — ZK、Kafka、MQ
-4. 容器 — Docker、k8s
+| 类别 | 典型产品 |
+|------|----------|
+| **Web 中间件** | Nginx、Tomcat、HAProxy、Keepalived、LVS |
+| **缓存中间件** | Redis、Memcached |
+| **分布式中间件** | Zookeeper |
+| **消息中间件** | Kafka、RabbitMQ、ActiveMQ |
+
+**速记口诀**
+
+- Web 五件套：Nginx / Tomcat / HAProxy / Keepalived / LVS
+- 缓存双雄：Redis / Memcached
+- 分布式：Zookeeper（协调、选主、配置）
+- 消息三剑客：Kafka / RabbitMQ / ActiveMQ
+
+**与 1.1 广义分类对照**
+
+| 1.1 广义四类 | 1.3 常见中间件 |
+|--------------|----------------|
+| Web | Web（+ Keepalived、LVS） |
+| 数据库和缓存 | 缓存（Redis、Memcached）；数据库另列 |
+| 消息和分布式 | **拆分为** 分布式（ZK）+ 消息（Kafka 等） |
+| 容器 | 本页未列（Docker、k8s 见架构章节） |
 
 ## 二、Web 中间件架构与运维
 
@@ -274,4 +292,4 @@ VIP（虚拟 IP）   ← 两 HAProxy + Keepalived 提供应用入口
 
 ---
 
-**进度说明：** 1.1 ✅、1.2 ✅（狭义架构 + OP 双中心 + 数据库集群1/2）、1.3 ✅；第二至四章待截图补充。
+**进度说明：** 第一章 ✅（1.1–1.3 完整）；第二至四章待截图补充。
