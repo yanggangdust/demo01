@@ -322,6 +322,63 @@ Tomcat-1  Tomcat-2  Tomcat-3
 | 高并发 | 负载均衡 + 缓存加速 |
 | 多 Tomcat | 统一入口；Session 靠 Redis 共享 |
 
+#### Nginx 编译安装（1.18.0 源码）
+
+**安装前准备**
+
+```bash
+# 安装依赖
+yum install gcc pcre-devel openssl-devel zlib-devel -y
+
+# 创建 nginx 系统用户（禁止登录、不建家目录）
+useradd -s /sbin/nologin nginx -M
+```
+
+**编译安装**
+
+```bash
+wget http://nginx.org/download/nginx-1.18.0.tar.gz
+tar xf nginx-1.18.0.tar.gz
+cd nginx-1.18.0
+
+./configure --prefix=/usr/local/nginx \
+  --user=nginx \
+  --group=nginx \
+  --with-http_ssl_module \
+  --with-http_v2_module \
+  --with-http_realip_module \
+  --with-http_stub_status_module \
+  --with-http_gzip_static_module \
+  --with-pcre \
+  --with-stream \
+  --with-stream_ssl_module \
+  --with-stream_realip_module
+
+make && make install
+chown -R nginx:nginx /usr/local/nginx
+```
+
+**configure 常用模块速记**
+
+| 参数 | 作用 |
+|------|------|
+| `--prefix` | 安装路径 `/usr/local/nginx` |
+| `--user/--group` | 运行用户/组 `nginx` |
+| `--with-http_ssl_module` | HTTPS |
+| `--with-http_v2_module` | HTTP/2 |
+| `--with-http_realip_module` | 获取客户端真实 IP |
+| `--with-http_stub_status_module` | 状态监控页 |
+| `--with-http_gzip_static_module` | 静态 gzip |
+| `--with-stream` | 四层 TCP/UDP 代理 |
+| `--with-stream_ssl_module` | Stream SSL |
+| `--with-stream_realip_module` | Stream 真实 IP |
+
+**易考点**
+
+- 依赖：**gcc、pcre-devel、openssl-devel、zlib-devel**
+- 运行用户：`useradd -s /sbin/nologin nginx -M`
+- 安装后改属主：`chown -R nginx:nginx /usr/local/nginx`
+
 ### 2.2 Tomcat
 > 待补充
 
@@ -362,4 +419,4 @@ Tomcat-1  Tomcat-2  Tomcat-3
 
 ---
 
-**进度说明：** 第一章 ✅；2.1 Nginx（介绍 + 作用）✅；2.2–2.4 及第三、四章待截图补充。
+**进度说明：** 第一章 ✅；2.1 Nginx（介绍 + 作用 + 编译安装）✅；2.2–2.4 及第三、四章待截图补充。
