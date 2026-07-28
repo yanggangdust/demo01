@@ -1753,6 +1753,45 @@ Topic（逻辑分类）
 | 跨 Group | 同一条消息 → **多个 Group 各消费一次**（广播） |
 | 组内 | **同一 Group 内** → 每条消息**只被一个 Consumer** 消费（负载均衡） |
 
+#### Controller（Kafka 基本概念）
+
+**定义**
+
+- **Controller** 类似其他分布式系统中的 **Master** 角色
+- 维护**全局元数据**
+- **任意 Broker 都可充当 Controller**（与数据节点合一）；集群**同一时刻只有一个 Controller**
+
+**主要职责**
+
+| 职责 | 内容 |
+|------|------|
+| **Broker 管理** | Broker **上线、下线**处理 |
+| **Topic/Partition** | Topic **创建**、分区**扩容**、副本**分配**、**Leader 选举** |
+| **状态机** | 管理所有**副本状态机**和**分区状态机**；处理状态机变化事件 |
+| **运维操作** | Topic **删除**、副本**迁移**、**Leader 切换** |
+
+**架构关系（课件）**
+
+```
+Broker(Controller) ──管理──→ Broker × N
+        │                        │
+        │ 状态监听/更新            │（虚线连接）
+        │ 注册节点/更新 ISR        ↓
+        └──────────────→ Zookeeper ←──────────
+```
+
+| 交互 | 说明 |
+|------|------|
+| Controller → Broker | 集群管理与协调 |
+| Controller ↔ Zookeeper | **状态监听/更新**；**注册节点/更新 ISR** |
+| Broker ↔ Zookeeper | 各 Broker 也连接 ZK |
+
+**易考点**
+
+- Controller = **单点角色**（非独立进程，是某个 Broker 兼任）
+- **ISR**（In-Sync Replicas）：同步副本集合，Controller 负责更新
+- Controller 故障 → 其他 Broker **竞选**新 Controller（类比 VRRP Master 选举）
+
 ### 4.2 Kafka 基础操作 ★
 > 待补充
 
@@ -1767,4 +1806,4 @@ Topic（逻辑分类）
 
 ---
 
-**进度说明：** 第一、二、三章 ✅；4.1 Kafka（简介 + 项目 + 设计目标 + 基本概念）✅；4.2 待截图补充。
+**进度说明：** 第一、二、三章 ✅；4.1 Kafka（含 Controller）✅；4.2 待截图补充。
