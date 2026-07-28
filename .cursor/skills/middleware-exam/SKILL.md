@@ -609,6 +609,54 @@ echo "Hello Nginx" > /usr/share/nginx/html/index.htm
 | 静态/动态 | 擅长静态 + 反向代理 | 擅长 **JSP/Servlet 动态页面** |
 | 关系 | 常作 Tomcat 前端的统一入口与负载均衡 | 后端应用容器 |
 
+#### Tomcat — 处理动态请求（Nginx + Tomcat 分工）
+
+**核心思路**
+
+- Nginx 处理**静态页面**效率**远高于** Tomcat
+- **HTML、CSS、JS、图片**等静态资源 → **Nginx 直接处理**
+- **动态请求**（如 JSP）→ **交给 Tomcat** 处理，提升系统吞吐量
+
+**请求分流架构**
+
+```
+客户端
+  ↓
+Nginx 服务
+  ├── 静态请求（html/css/js/图片）→ Nginx 直接返回
+  └── 动态请求 → Tomcat 服务 → JSP
+```
+
+**Nginx 配置示例（课件）**
+
+```nginx
+# 静态资源 — nginx 处理
+location ~ .*\.(html|htm|gif|jpg|jpeg|bmp|png|ico|txt|js|css)$ {
+    root /webapps/myproject/code/static-resource;
+    expires 3d;
+}
+
+# 其余动态请求 — 转发 tomcat
+location / {
+    proxy_pass http://127.0.0.1:8080;
+}
+```
+
+**配置要点**
+
+| 指令 | 作用 |
+|------|------|
+| `location ~ .*\.(html\|htm\|…)$` | 正则匹配静态文件扩展名 |
+| `root` | 静态文件根目录 |
+| `expires 3d` | 浏览器缓存 3 天 |
+| `proxy_pass http://127.0.0.1:8080` | 动态请求反向代理到 Tomcat（默认 8080） |
+
+**易考点**
+
+- **静动分离**：Nginx 静态 + Tomcat 动态，是经典生产架构
+- Tomcat 默认端口 **8080**
+- 与 **2.1 Nginx 作用**（Tomcat 集群 + Redis Session）可组合记忆
+
 ### 2.3 HAProxy ★
 > 待补充
 
@@ -646,4 +694,4 @@ echo "Hello Nginx" > /usr/share/nginx/html/index.htm
 
 ---
 
-**进度说明：** 第一章 ✅；2.1 Nginx ✅；2.2 Tomcat 简介 ✅；2.3–2.4 及第三、四章待截图补充。
+**进度说明：** 第一章 ✅；2.1 Nginx ✅；2.2 Tomcat（简介 + 动静态分离）✅；2.3–2.4 及第三、四章待截图补充。
