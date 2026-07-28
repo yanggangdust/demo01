@@ -422,6 +422,56 @@ systemctl status nginx
 | 模块 | 自定义 configure 参数 | 发行版预编译模块 |
 | 共同准备 | gcc/pcre/openssl/zlib 依赖 + nginx 用户 | 同上 + **epel-release** |
 
+#### Nginx 基础运维
+
+**查看服务和进程**
+
+```bash
+systemctl start nginx
+systemctl status nginx
+```
+
+**status 输出要点（node164 示例）**
+
+- 服务名：`nginx.service - The nginx HTTP and reverse proxy server`
+- 单元文件：`/usr/lib/systemd/system/nginx.service`
+- 状态：**active (running)**
+- 进程结构：
+  - `nginx: master process /usr/sbin/nginx`（主进程，如 PID 1892）
+  - `nginx: worker process`（工作进程，如 PID 1893、1894）
+- 启动前日志：`/etc/nginx/nginx.conf` **syntax is ok** / **test is successful**
+
+**服务启停验证**
+
+- 访问测试：`http://192.168.205.164/index.htm`
+
+**查看网络连接**
+
+```bash
+netstat -anlp | grep nginx
+```
+
+| 状态 | 含义 |
+|------|------|
+| **LISTEN** `0.0.0.0:80` / `:::80` | master 进程监听 80 端口（IPv4/IPv6） |
+| **ESTABLISHED** | worker 进程处理客户端连接 |
+
+**现网标准化部署（课件）**
+
+| 项 | 路径/说明 |
+|----|-----------|
+| 部署目录 | `/apps/svr/bcop_static/` |
+| 日志路径 | `/apps/logs/nginx_80` |
+| 管理脚本 | `/apps/sh/nginx_80.sh` |
+| 脚本参数 | `start \| stop \| restart \| status` |
+
+**易考点**
+
+- systemd 管理：`systemctl start/status nginx`
+- 进程模型：**1 master + 多 worker**；监听由 master，连接由 worker 处理
+- 排查端口：`netstat -anlp | grep nginx`
+- 生产环境常用**自定义脚本**而非仅 systemctl（路径标准化）
+
 ### 2.2 Tomcat
 > 待补充
 
@@ -462,4 +512,4 @@ systemctl status nginx
 
 ---
 
-**进度说明：** 第一章 ✅；2.1 Nginx（介绍 + 作用 + 编译/在线安装）✅；2.2–2.4 及第三、四章待截图补充。
+**进度说明：** 第一章 ✅；2.1 Nginx（介绍 + 作用 + 安装 + 基础运维）✅；2.2–2.4 及第三、四章待截图补充。
