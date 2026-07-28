@@ -972,7 +972,31 @@ systemctl start haproxy && systemctl status haproxy
 | 依赖 | 需 **epel-release** | 同左 + 路径/日志标准化 |
 
 ### 2.4 Keepalived ★
-> 待补充
+
+#### Keepalived 介绍
+
+**定义**
+
+- Keepalived 是**集群管理**中保证**集群高可用**的服务软件
+- 用于**防止单点故障（SPOF）**
+
+**实现基础**
+
+- 以 **VRRP 协议**为实现基础
+- **VRRP**（Virtual Router Redundancy Protocol）：用于解决**静态路由的高可用**
+
+**易考点**
+
+| 概念 | 说明 |
+|------|------|
+| **Keepalived** | 高可用软件；健康检查 + **VIP 漂移** |
+| **VRRP** | 虚拟路由冗余协议；多节点选主/备，故障切换 |
+| **典型场景** | 1.2 **MySQL + Keepalived + VIP**；Nginx/HAProxy 主备 |
+
+**与课程其他组件关联**
+
+- **1.2 数据库集群 1**：Keepalived 监控本机 MySQL，异常时 **VIP 迁移**
+- **HAProxy/Nginx**：常与 Keepalived 组合实现入口层高可用（主备 + VIP）
 
 ## 三、缓存中间件架构与运维
 
