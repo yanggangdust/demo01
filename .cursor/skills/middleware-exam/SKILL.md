@@ -1376,6 +1376,44 @@ client → request → Nginx/PHP（应用层）
 - 不适合 **海量冷数据** — 内存贵、容量有限
 - 排行榜/计数器/消息队列 → 考 Redis **丰富数据结构** 的应用
 
+#### Redis 单机安装部署（3.0.7 源码）
+
+```bash
+# 1. 下载指定版本源码
+wget http://download.redis.io/releases/redis-3.0.7.tar.gz
+
+# 2. 解压
+tar xzf redis-3.0.7.tar.gz
+
+# 3. 建立软链接（指向解压目录）
+ln -s redis-3.0.7 redis
+
+# 4. 进入目录
+cd redis
+
+# 5. 编译（需先安装 gcc）
+make
+
+# 6. 安装
+make install
+```
+
+**步骤要点**
+
+| 步骤 | 说明 |
+|------|------|
+| wget | 下载 **redis-3.0.7** 源码包 |
+| tar xzf | 解压 |
+| ln -s | 软链接 `redis` → `redis-3.0.7`，便于升级切换 |
+| make | **编译**；前置条件：系统已装 **gcc** |
+| make install | 安装到系统路径 |
+
+**易考点**
+
+- Redis **源码编译**安装（与 Tomcat tar 解压不同，需 make）
+- 编译前必须有 **gcc**
+- 课件版本：**3.0.7**
+
 ### 3.2 Memcached
 > 待补充
 
@@ -1400,4 +1438,4 @@ client → request → Nginx/PHP（应用层）
 
 ---
 
-**进度说明：** 第一、二章 ✅；3.1 Redis（介绍 + 特性 + 应用场景）✅；3.2 及第四章待截图补充。
+**进度说明：** 第一、二章 ✅；3.1 Redis（介绍 + 特性 + 场景 + 单机安装）✅；3.2 及第四章待截图补充。
