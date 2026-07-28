@@ -1197,6 +1197,27 @@ systemctl status keepalived
 | `router_id` | 一般 = **hostname**，便于告警定位 |
 | `notification_email` | 配合 **smtp_server** 发切换通知 |
 
+#### Keepalived 配置项 2
+
+| 配置项 | 说明 |
+|--------|------|
+| **interface** | 实例绑定的**网卡**；配置 VIP 必须加在**已有网卡**上 |
+| **virtual_router_id** | 设置 **VRID**（非常重要）；**相同 VRID 为一组**；决定**组播 MAC 地址** |
+| **priority** | 本节点**优先级**；**数值高者为 Master** |
+| **advert_int** | **检查/通告间隔**，默认 **1 秒**；VRRP 定时器；Master 每隔此时间发 **advertisement 报文**通知组内路由器正常 |
+| **authentication** | 认证方式与密码；**主从必须一致** |
+| **virtual_ipaddress** | 设置 **VIP**；随 state 变化**增删**：**Master 添加**，**Backup 删除**（主要由优先级决定）；可配**多个 VIP** |
+
+**易考点**
+
+| 配置项 | 要点 |
+|--------|------|
+| `virtual_router_id` | 同组节点 VRID **必须相同** |
+| `priority` | 越大越优先当 Master（与配置项1的 state 选举呼应） |
+| `advert_int` | 默认 1s；对应 VRRP **Advertisement_Interval** |
+| `virtual_ipaddress` | Master 挂 VIP，Backup 卸 VIP；可多 VIP |
+| `authentication` | 主备配置**完全一致** |
+
 ## 三、缓存中间件架构与运维
 
 > 涵盖：Redis、Memcached。
@@ -1228,4 +1249,4 @@ systemctl status keepalived
 
 ---
 
-**进度说明：** 第一章 ✅；第二章 Web 中间件（2.1–2.4，Keepalived 含配置项1）✅；第三、四章待截图补充。
+**进度说明：** 第一章 ✅；第二章 Web 中间件（2.1–2.4，Keepalived 配置项1/2）✅；第三、四章待截图补充。
