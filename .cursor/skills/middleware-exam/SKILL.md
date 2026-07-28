@@ -1872,6 +1872,27 @@ Partition 2:  [0][1][2]...[12]
 - 端口确认：`lsof -i:2181`（ZK）、`lsof -i:9092`（Kafka）
 - ZK 可用安装包自带，无需单独部署（课件场景）
 
+#### Kafka 配置参数（server.properties）
+
+| 参数 | 课件推荐 | 含义 |
+|------|----------|------|
+| **controlled.shutdown.enable** | **true** | **Controlled shutdown**：Broker 停止前将 Leader **迁移到其他 Broker**，避免 unclean shutdown 导致异常 |
+| **num.network.threads** | ≈ **CPU 核数** | Broker 处理消息的**最大网络线程数** |
+| **num.replica.fetchers** | **24**（32 核系统） | 副本同步线程数；增大可加快 Follower 同步，高负载下避免副本跟不上；会增加 Follower **I/O** 压力 |
+| **zookeeper.session.timeout.ms** | **120000** | 连接 ZK 的**最大超时**（ms）；增大可避免网络波动或 Broker 繁忙导致与 ZK **断连** |
+| **auto.create.topics.enable** | **false** | **禁止自动创建 Topic**；避免客户端写错 Topic 名被静默创建而不报错 |
+| **auto.leader.rebalance.enable** | **false** | **禁止自动 Leader 重平衡**；必要时**手动触发**（课件误写 audo.leader.rebalance.enable） |
+
+**易考点速记**
+
+| 参数 | 为什么设 false/true |
+|------|---------------------|
+| `controlled.shutdown.enable=true` | 优雅下线，Leader 先迁走 |
+| `auto.create.topics.enable=false` | 防误建 Topic |
+| `auto.leader.rebalance.enable=false` | 防自动 rebalance 扰动 |
+| `num.replica.fetchers↑` | 副本同步加速，I/O 代价 |
+| `zookeeper.session.timeout.ms=120000` | 防 ZK 误断连 |
+
 ## 复习互动方式
 
 1. **默写**：某一整块（如消息队列模型 / 缓存读写策略）
@@ -1883,4 +1904,4 @@ Partition 2:  [0][1][2]...[12]
 
 ---
 
-**进度说明：** 第一～三章 ✅；4.1 Kafka ✅；4.2 Kafka 安装和启动 ✅；后续 Kafka 操作待截图补充。
+**进度说明：** 第一～三章 ✅；4.1 Kafka ✅；4.2（安装启动 + 配置参数）✅；后续 Kafka 操作待截图补充。
