@@ -1836,7 +1836,41 @@ Partition 2:  [0][1][2]...[12]
 | 消息顺序保证？ | **Partition 内有序**，非 Topic 全局 |
 
 ### 4.2 Kafka 基础操作 ★
-> 待补充
+
+#### Kafka 安装和启动
+
+**前提**
+
+> 启动 **Kafka Server** 前，须确保 **Zookeeper Server** 已运行；可使用 Kafka 安装包**自带的 Zookeeper**。
+
+**启动/停止命令**
+
+| 操作 | 命令 |
+|------|------|
+| **启动 Zookeeper** | `bin/zookeeper-server-start.sh -daemon ../config/zookeeper.properties` |
+| **停止 Zookeeper** | `bin/zookeeper-server-stop.sh` |
+| **确认 ZK** | `lsof -i:2181` |
+| **启动 Kafka** | `bin/kafka-server-start.sh -daemon config/server.properties` |
+| **停止 Kafka** | `bin/kafka-server-stop.sh` |
+| **确认 Kafka** | `lsof -i:9092` |
+
+**启动顺序（易考点）**
+
+```
+1. Zookeeper（2181）  →  2. Kafka（9092）
+```
+
+| 服务 | 默认端口 | 配置文件 |
+|------|----------|----------|
+| **Zookeeper** | **2181** | `../config/zookeeper.properties` |
+| **Kafka** | **9092** | `config/server.properties` |
+
+**易考点**
+
+- **先 ZK 后 Kafka**；顺序反了 Kafka 无法正常启动
+- **-daemon** = 后台运行
+- 端口确认：`lsof -i:2181`（ZK）、`lsof -i:9092`（Kafka）
+- ZK 可用安装包自带，无需单独部署（课件场景）
 
 ## 复习互动方式
 
@@ -1849,4 +1883,4 @@ Partition 2:  [0][1][2]...[12]
 
 ---
 
-**进度说明：** 第一、二、三章 ✅；4.1 Kafka（含 Topic/Partition）✅；4.2 待截图补充。
+**进度说明：** 第一～三章 ✅；4.1 Kafka ✅；4.2 Kafka 安装和启动 ✅；后续 Kafka 操作待截图补充。
