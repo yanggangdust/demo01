@@ -1587,6 +1587,44 @@ ps -ef | grep memca             # 可见 11211 默认实例 + 50001 新实例
 - 可同时运行**多个实例**（不同 port + PID 文件）
 - 默认实例（systemctl）：11211；手动实例：50001
 
+#### Memcached 练习实操
+
+**题目**
+
+> 使用端口 **50001** 启动 Memcached，并验证进程与端口连通。
+
+**完整步骤（参考答案）**
+
+```bash
+# 1. 启动（端口 50001）
+memcached -u root -P /tmp/memcached.pid -p 50001 -m 64m -d
+
+# 2. 查看进程
+cat /tmp/memcached.pid          # 3058
+ps -ef | grep memca             # PID 3058，port 50001
+
+# 3. 检查端口连通
+telnet localhost 50001
+# Trying ::1...
+# Connected to localhost.     ← 连通成功
+# Escape character is '^]'.
+```
+
+**验证要点**
+
+| 步骤 | 成功标志 |
+|------|----------|
+| 启动 | 无报错返回 |
+| PID | `cat /tmp/memcached.pid` 有 PID（如 3058） |
+| 进程 | `ps -ef \| grep memca` 可见 **50001** 实例 |
+| 端口 | `telnet localhost 50001` 显示 **Connected** |
+
+**考点串联**
+
+- 启动参数：**-p 50001 -m 64m -d -P pidfile -u root**
+- 与 systemctl 默认实例（11211）**共存**
+- 连通性测试：**telnet** 端口
+
 ## 四、分布式中间件架构与运维
 
 > 涵盖：Zookeeper、Kafka。
@@ -1608,4 +1646,4 @@ ps -ef | grep memca             # 可见 11211 默认实例 + 50001 新实例
 
 ---
 
-**进度说明：** 第一、二章 ✅；第三章 3.1 Redis ✅、3.2 Memcached（介绍 + 安装 + 启动参数）✅；第四章待截图补充。
+**进度说明：** 第一、二章 ✅；第三章完整（3.1 Redis ✅、3.2 Memcached ✅）；第四章待截图补充。
